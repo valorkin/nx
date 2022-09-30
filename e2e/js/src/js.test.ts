@@ -1,6 +1,7 @@
 import {
   checkFilesDoNotExist,
   checkFilesExist,
+  cleanupProject,
   createFile,
   expectJestTestsToPass,
   newProject,
@@ -22,6 +23,8 @@ describe('js e2e', () => {
     scope = newProject();
   });
 
+  afterEach(() => cleanupProject());
+
   it('should create libs with npm scripts', () => {
     const npmScriptsLib = uniq('npmscriptslib');
     runCLI(`generate @nrwl/js:lib ${npmScriptsLib} --config=npm-scripts`);
@@ -29,7 +32,6 @@ describe('js e2e', () => {
     expect(libPackageJson.scripts.test).toBeDefined();
     expect(libPackageJson.scripts.build).toBeDefined();
     expect(runCLI(`test ${npmScriptsLib}`)).toContain('implement test');
-    expect(runCLI(`test ${npmScriptsLib}`)).toContain('match the cache');
 
     const tsconfig = readJson(`tsconfig.base.json`);
     expect(tsconfig.compilerOptions.paths).toEqual({
@@ -44,9 +46,6 @@ describe('js e2e', () => {
     expect(libPackageJson.scripts).toBeUndefined();
     expect((await runCLIAsync(`test ${lib}`)).combinedOutput).toContain(
       'Ran all test suites'
-    );
-    expect((await runCLIAsync(`test ${lib}`)).combinedOutput).toContain(
-      'match the cache'
     );
 
     const packageJson = readJson('package.json');
@@ -113,9 +112,6 @@ describe('js e2e', () => {
     expect((await runCLIAsync(`test ${parentLib}`)).combinedOutput).toContain(
       'Ran all test suites'
     );
-    expect((await runCLIAsync(`test ${parentLib}`)).combinedOutput).toContain(
-      'match the cache'
-    );
 
     expect(runCLI(`build ${parentLib}`)).toContain(
       'Done compiling TypeScript files'
@@ -179,9 +175,6 @@ describe('js e2e', () => {
     expect((await runCLIAsync(`test ${lib}`)).combinedOutput).toContain(
       'Ran all test suites'
     );
-    expect((await runCLIAsync(`test ${lib}`)).combinedOutput).toContain(
-      'match the cache'
-    );
 
     expect(runCLI(`build ${lib}`)).toContain(
       'Successfully compiled: 2 files with swc'
@@ -202,9 +195,6 @@ describe('js e2e', () => {
     expect(parentLibPackageJson.scripts).toBeUndefined();
     expect((await runCLIAsync(`test ${parentLib}`)).combinedOutput).toContain(
       'Ran all test suites'
-    );
-    expect((await runCLIAsync(`test ${parentLib}`)).combinedOutput).toContain(
-      'match the cache'
     );
 
     expect(runCLI(`build ${parentLib}`)).toContain(
@@ -272,7 +262,7 @@ describe('js e2e', () => {
       return `
         import { ${lib} } from '@${scope}/${lib}'
         export * from './lib/${base}';
-        
+
         ${lib}();
       `;
     });
@@ -302,7 +292,7 @@ export function ${lib}Wildcard() {
         import { ${lib} } from '@${scope}/${lib}';
         import { ${lib}Wildcard } from '@${scope}/${lib}/src/${lib}';
         export * from './lib/${base}';
-        
+
         ${lib}();
         ${lib}Wildcard();
       `;

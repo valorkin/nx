@@ -7,6 +7,7 @@ import type {
 import { TransformerEntry } from './typescript/types';
 
 export type Compiler = 'tsc' | 'swc';
+export type Bundler = 'none' | 'rollup' | 'esbuild' | 'webpack';
 
 export interface LibraryGeneratorSchema {
   name: string;
@@ -28,12 +29,14 @@ export interface LibraryGeneratorSchema {
   setParserOptionsProject?: boolean;
   config?: 'workspace' | 'project' | 'npm-scripts';
   compiler?: Compiler;
+  bundler?: Bundler;
   skipTypeCheck?: boolean;
 }
 
 export interface ExecutorOptions {
   assets: Array<AssetGlob | string>;
   main: string;
+  rootDir?: string;
   outputPath: string;
   tsConfig: string;
   swcrc?: string;
@@ -47,7 +50,7 @@ export interface ExecutorOptions {
 export interface NormalizedExecutorOptions extends ExecutorOptions {
   root?: string;
   sourceRoot?: string;
-  projectRoot?: string;
+  projectRoot: string;
   mainOutputPath: string;
   files: Array<FileInputOutput>;
 }

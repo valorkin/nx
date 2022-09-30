@@ -2,7 +2,7 @@
   "githubRoot": "https://github.com/nrwl/nx/blob/master",
   "name": "react",
   "packageName": "@nrwl/react",
-  "description": "The React plugin contains executors and generators for managing React applications and libraries within an Nx workspace. It provides:\n\n\n- Integration with libraries such as Jest, Cypress, and Storybook.\n\n- Generators for applications, libraries, components, hooks, and more.\n\n- Library build support for publishing packages to npm or other registries.\n\n- Utilities for automatic workspace refactoring.",
+  "description": "The React plugin for Nx contains executors and generators for managing React applications and libraries within an Nx workspace. It provides:\n\n\n- Integration with libraries such as Jest, Cypress, and Storybook.\n\n- Generators for applications, libraries, components, hooks, and more.\n\n- Library build support for publishing packages to npm or other registries.\n\n- Utilities for automatic workspace refactoring.",
   "root": "/packages/react",
   "source": "/packages/react/src",
   "documentation": [
@@ -136,7 +136,7 @@
           "linter": {
             "description": "The tool to use for running lint checks.",
             "type": "string",
-            "enum": ["eslint", "tslint"],
+            "enum": ["eslint"],
             "default": "eslint"
           },
           "routing": {
@@ -304,7 +304,7 @@
           "linter": {
             "description": "The tool to use for running lint checks.",
             "type": "string",
-            "enum": ["eslint", "tslint"],
+            "enum": ["eslint"],
             "default": "eslint"
           },
           "unitTestRunner": {
@@ -645,7 +645,7 @@
           "linter": {
             "description": "The tool to use for running lint checks.",
             "type": "string",
-            "enum": ["eslint", "tslint"],
+            "enum": ["eslint"],
             "default": "eslint"
           },
           "standaloneConfig": {
@@ -663,9 +663,15 @@
               "**/**/src/**/*.other.*",
               "libs/my-lib/src/not-stories/**,**/**/src/**/*.other.*,apps/my-app/**/*.something.ts"
             ]
+          },
+          "configureTestRunner": {
+            "type": "boolean",
+            "description": "Add a Storybook Test-Runner target.",
+            "x-prompt": "Add a Storybook Test-Runner target?"
           }
         },
         "required": ["name"],
+        "examplesFile": "This generator will set up Storybook for your Angular project.\n\n```bash\nnx g @nrwl/react:storybook-configuration project-name\n```\n\nYou can read more about how this generator works, in the [Storybook for React overview page](/storybook/overview-react#generate-storybook-configuration-for-an-react-project).\n\nWhen running this generator, you will be prompted to provide the following:\n\n- The `name` of the project you want to generate the configuration for.\n- Whether you want to `configureCypress`. If you choose `yes`, a Cypress e2e app will be created (or configured) to run against the project's Storybook instance. You can read more about this in the [Storybook for React - Cypress section](/storybook/overview-react#cypress-tests-for-stories).\n- Whether you want to `generateStories` for the components in your project. If you choose `yes`, a `.stories.ts` file will be generated next to each of your components in your project.\n- Whether you want to `generateCypressSpecs`. If you choose `yes`, a test file is going to be generated in the project's Cypress e2e app for each of your components.\n- Whether you want to `configureTestRunner`. If you choose `yes`, a `test-storybook` target will be generated in your project's `project.json`, with a command to invoke the [Storybook `test-runner`](https://storybook.js.org/docs/react/writing-tests/test-runner).\n\nYou must provide a `name` for the generator to work.\n\nThere are a number of other options available. Let's take a look at some examples.\n\n## Examples\n\n### Generate Storybook configuration using TypeScript\n\n```bash\nnx g @nrwl/react:storybook-configuration ui --tsConfiguration=true\n```\n\nThis will generate a Storybook configuration for the `ui` project using TypeScript for the Storybook configuration files (the files inside the `.storybook` directory).\n\n### Ignore certain paths when generating stories\n\n```bash\nnx g @nrwl/react:storybook-configuration ui --generateStories=true --ignorePaths=libs/ui/src/not-stories/**,**/**/src/**/*.other.*,apps/my-app/**/*.something.ts\n```\n\nThis will generate a Storybook configuration for the `ui` project and generate stories for all components in the `libs/ui/src/lib` directory, except for the ones in the `libs/ui/src/not-stories` directory, and the ones in the `apps/my-app` directory that end with `.something.ts`, and also for components that their file name is of the pattern `*.other.*`.\n\nThis is useful if you have a project that contains components that are not meant to be used in isolation, but rather as part of a larger component.\n\n### Generate stories using JavaScript instead of TypeScript\n\n```bash\nnx g @nrwl/react:storybook-configuration ui --generateStories=true --js=true\n```\n\nThis will generate stories for all the components in the `ui` project using JavaScript instead of TypeScript. So, you will have `.stories.js` files next to your components.\n",
         "presets": []
       },
       "description": "Set up storybook for a React app or library.",
@@ -755,6 +761,7 @@
           }
         },
         "required": ["project"],
+        "examplesFile": "This generator will generate stories for all your components in your project.\n\n```bash\nnx g @nrwl/react:stories project-name\n```\n\nYou can read more about how this generator works, in the [Storybook for React overview page](/storybook/overview-react#auto-generate-stories).\n\nWhen running this generator, you will be prompted to provide the following:\n\n- The `name` of the project you want to generate the configuration for.\n- Whether you want to `generateCypressSpecs`. If you choose `yes`, a test file is going to be generated in the project's Cypress e2e app for each of your components.\n\nYou must provide a `name` for the generator to work.\n\nThere are a number of other options available. Let's take a look at some examples.\n\n## Examples\n\n### Ignore certain paths when generating stories\n\n```bash\nnx g @nrwl/react:stories ui --ignorePaths=libs/ui/src/not-stories/**,**/**/src/**/*.other.*\n```\n\nThis will generate stories for all the components in the `ui` project, except for the ones in the `libs/ui/src/not-stories` directory, and also for components that their file name is of the pattern `*.other.*`.\n\nThis is useful if you have a project that contains components that are not meant to be used in isolation, but rather as part of a larger component.\n\n### Generate stories using JavaScript instead of TypeScript\n\n```bash\nnx g @nrwl/react:stories ui --js=true\n```\n\nThis will generate stories for all the components in the `ui` project using JavaScript instead of TypeScript. So, you will have `.stories.js` files next to your components.\n",
         "presets": []
       },
       "description": "Create stories/specs for all components declared in an app or library.",
@@ -949,7 +956,7 @@
           "linter": {
             "description": "The tool to use for running lint checks.",
             "type": "string",
-            "enum": ["eslint", "tslint"],
+            "enum": ["eslint"],
             "default": "eslint"
           },
           "skipFormat": {
@@ -1106,7 +1113,7 @@
           "linter": {
             "description": "The tool to use for running lint checks.",
             "type": "string",
-            "enum": ["eslint", "tslint"],
+            "enum": ["eslint"],
             "default": "eslint"
           },
           "routing": {
@@ -1227,18 +1234,19 @@
           "project": {
             "type": "string",
             "description": "The name of the project to add cypress component testing configuration to",
-            "$default": { "$source": "projectName" },
+            "x-dropdown": "projects",
             "x-prompt": "What project should we add Cypress component testing to?"
+          },
+          "generateTests": {
+            "type": "boolean",
+            "description": "Generate default component tests for existing components in the project",
+            "x-prompt": "Automatically generate tests for components declared in this project?",
+            "default": false
           },
           "buildTarget": {
             "type": "string",
             "description": "A build target used to configure Cypress component testing in the format of `project:target[:configuration]`. The build target should be from a React app. If not provided we will try to infer it from your projects usage.",
             "pattern": "^[^:\\s]+:[^:\\s]+(:\\S+)?$"
-          },
-          "generateTests": {
-            "type": "boolean",
-            "description": "Generate default component tests for existing components in the project",
-            "default": false
           },
           "skipFormat": {
             "type": "boolean",
@@ -1275,7 +1283,7 @@
           "project": {
             "type": "string",
             "description": "The name of the project the component is apart of",
-            "$default": { "$source": "projectName" },
+            "x-dropdown": "projects",
             "x-prompt": "What project is this component apart of?"
           },
           "componentPath": {

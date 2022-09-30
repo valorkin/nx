@@ -11,7 +11,7 @@ import {
   ProjectConfiguration,
   ProjectsConfigurations,
 } from '../config/workspace-json-project-json';
-import { DaemonClient } from '../daemon/client/client';
+import { daemonClient } from '../daemon/client/client';
 
 /**
  * Synchronously reads the latest cached copy of the workspace's ProjectGraph.
@@ -118,11 +118,12 @@ function handleProjectGraphError(opts: { exitOnError: boolean }, e) {
  * stored in the daemon process. To reset both run: `nx reset`.
  */
 export async function createProjectGraphAsync(
-  opts: { exitOnError: boolean } = { exitOnError: false }
+  opts: { exitOnError: boolean; resetDaemonClient?: boolean } = {
+    exitOnError: false,
+    resetDaemonClient: false,
+  }
 ): Promise<ProjectGraph> {
-  const nxJson = readNxJson();
-  const daemon = new DaemonClient(nxJson);
-  if (!daemon.enabled()) {
+  if (!daemonClient.enabled()) {
     try {
       return await buildProjectGraphWithoutDaemon();
     } catch (e) {
@@ -130,7 +131,10 @@ export async function createProjectGraphAsync(
     }
   } else {
     try {
-      return await daemon.getProjectGraph();
+      if (opts.resetDaemonClient) {
+        daemonClient.reset();
+      }
+      return await daemonClient.getProjectGraph();
     } catch (e) {
       if (!e.internalDaemonError) {
         handleProjectGraphError(opts, e);

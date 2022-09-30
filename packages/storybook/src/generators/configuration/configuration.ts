@@ -28,6 +28,7 @@ import { findStorybookAndBuildTargetsAndCompiler } from '../../utils/utilities';
 import {
   storybookNextAddonVersion,
   storybookSwcAddonVersion,
+  storybookTestRunnerVersion,
 } from '../../utils/versions';
 
 export async function configurationGenerator(
@@ -64,9 +65,14 @@ export async function configurationGenerator(
   addBuildStorybookToCacheableOperations(tree);
 
   if (schema.uiFramework === '@storybook/angular') {
-    addAngularStorybookTask(tree, schema.name);
+    addAngularStorybookTask(tree, schema.name, schema.configureTestRunner);
   } else {
-    addStorybookTask(tree, schema.name, schema.uiFramework);
+    addStorybookTask(
+      tree,
+      schema.name,
+      schema.uiFramework,
+      schema.configureTestRunner
+    );
   }
 
   if (schema.configureCypress) {
@@ -107,6 +113,18 @@ export async function configurationGenerator(
     );
   }
 
+  if (schema.configureTestRunner === true) {
+    tasks.push(
+      addDependenciesToPackageJson(
+        tree,
+        {},
+        {
+          '@storybook/test-runner': storybookTestRunnerVersion,
+        }
+      )
+    );
+  }
+
   await formatFiles(tree);
 
   return runTasksInSerial(...tasks);
@@ -117,7 +135,7 @@ function normalizeSchema(
 ): StorybookConfigureSchema {
   const defaults = {
     configureCypress: true,
-    linter: Linter.TsLint,
+    linter: Linter.EsLint,
     js: false,
   };
   return {

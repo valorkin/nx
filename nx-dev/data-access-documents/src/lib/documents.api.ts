@@ -1,4 +1,5 @@
 import { DocumentData, DocumentMetadata } from '@nrwl/nx-dev/models-document';
+import { MenuItem } from '@nrwl/nx-dev/models-menu';
 import { parseMarkdown } from '@nrwl/nx-dev/ui-markdoc';
 import { readFileSync } from 'fs';
 import { load as yamlLoad } from 'js-yaml';
@@ -42,12 +43,59 @@ export class DocumentsApi {
           ]
         : itemList,
     };
+    // this.allDocuments = options.allDocuments;
   }
 
-  getDocument(path: string[]): DocumentData {
-    const docPath = this.getFilePath(path);
+  /**
+   * Generate the content of a "Category" or "Index" page, listing all its direct items.
+   * @param path
+   */
+  getDocumentIndex(path: string[]): DocumentData | null {
+    let items = this.documents?.itemList;
+    let found: DocumentMetadata | null = null;
+    let itemPathToValidate: string[] = [];
 
-    const originalContent = readFileSync(docPath, 'utf8');
+    for (const part of path) {
+      found = items?.find((item) => item.id === part) || null;
+      if (found) {
+        itemPathToValidate.push(found.id);
+        items = found.itemList;
+      }
+    }
+
+    // If the ids have found the item, check that the segment correspond to the id tree
+    if (found && path.join('/') !== itemPathToValidate.join('/')) {
+      found = null;
+    }
+
+    if (!found) return null;
+
+    const cardListItems = items?.map((i) => ({
+      name: i.name,
+      path: i.path ?? '/' + path.concat(i.id).join('/'),
+    }));
+
+    return {
+      filePath: '',
+      data: {
+        title: found?.name,
+      },
+      content: `# ${found?.name}\n\n ${
+        found?.description ?? ''
+      }\n\n {% card-list items="${encodeURI(
+        JSON.stringify(cardListItems)
+      )}" /%}`,
+    };
+  }
+
+  /**
+   * Retrieve content from an existing markdown file using the `file` property.
+   * @param path
+   */
+  getDocument(path: string[]): DocumentData {
+    const { filePath, tags } = this.getDocumentInfo(path);
+
+    const originalContent = readFileSync(filePath, 'utf8');
     const ast = parseMarkdown(originalContent);
     const frontmatter = ast.attributes.frontmatter
       ? yamlLoad(ast.attributes.frontmatter)
@@ -60,9 +108,10 @@ export class DocumentsApi {
     }
 
     return {
-      filePath: docPath,
+      filePath,
       data: frontmatter,
-      content: originalContent,
+      content:
+        originalContent + '\n\n' + this.getRelatedDocumentsSection(tags, path),
     };
   }
 
@@ -75,19 +124,20 @@ export class DocumentsApi {
   getStaticDocumentPaths(): StaticDocumentPaths[] {
     const paths: StaticDocumentPaths[] = [];
 
-    function recur(curr, acc) {
+    function recur(curr: DocumentMetadata, acc: string[]): void {
       if (curr.isExternal) return;
+
+      // Enable addressable category path
+      paths.push({
+        params: {
+          segments: curr.path
+            ? curr.path.split('/').filter(Boolean).flat()
+            : [...acc, curr.id],
+        },
+      });
       if (curr.itemList) {
         curr.itemList.forEach((ii) => {
           recur(ii, [...acc, curr.id]);
-        });
-      } else {
-        paths.push({
-          params: {
-            segments: curr.path
-              ? curr.path.split('/').filter(Boolean).flat()
-              : [...acc, curr.id],
-          },
         });
       }
     }
@@ -102,26 +152,35 @@ export class DocumentsApi {
   }
 
   /**
-   * Getting the document's filePath is done in 2 steps
+   * Getting the document's filePath from the `file` property is done in 2 steps:
    * - traversing the tree by path segments
    * - if not found, try searching for it via the complete path string
    * @param path
    * @private
    */
-  private getFilePath(path: string[]): string {
+  private getDocumentInfo(path: string[]): {
+    filePath: string;
+    tags: string[];
+  } {
     let items = this.documents?.itemList;
 
     if (!items) {
-      throw new Error(`Document not found`);
+      throw new Error(`No document available for lookup`);
     }
 
     let found: DocumentMetadata | null = null;
+    let itemPathToValidate: string[] = [];
     // Traversing the tree by matching item's ids with path's segments
     for (const part of path) {
       found = items?.find((item) => item.id === part) || null;
       if (found) {
+        itemPathToValidate.push(found.id);
         items = found.itemList;
       }
+    }
+    // If the ids have found the item, check that the segment correspond to the id tree
+    if (found && path.join('/') !== itemPathToValidate.join('/')) {
+      found = null;
     }
 
     // If still not found, then attempt to match any item's id with the current path as a string
@@ -143,7 +202,90 @@ export class DocumentsApi {
     }
 
     if (!found) throw new Error(`Document not found`);
-    const file = found.file ?? ['generated', ...path].join('/');
-    return join(this.options.publicDocsRoot, `${file}.md`);
+    const makeFilePath = (pathPart: string): string => {
+      return join(this.options.publicDocsRoot, `${pathPart}.md`);
+    };
+    const file = found.file
+      ? { filePath: makeFilePath(found.file), tags: found.tags || [] }
+      : { filePath: makeFilePath(['generated', ...path].join('/')), tags: [] };
+    return file;
+  }
+
+  /**
+   * Displays a list of all concepts, recipes or reference documents that are tagged with the specified tag
+   * Tags are defined in map.json
+   * @param tag
+   * @returns
+   */
+  private getRelatedDocumentsSection(tags: string[], path: string[]): string {
+    let relatedConcepts: MenuItem[] = [];
+    let relatedRecipes: MenuItem[] = [];
+    let relatedReference: MenuItem[] = [];
+    function recur(curr, acc) {
+      if (curr.itemList) {
+        curr.itemList.forEach((ii) => {
+          recur(ii, [...acc, curr.id]);
+        });
+      } else if (path.join('/') === [...acc, curr.id].join('/')) {
+        return;
+      } else {
+        if (
+          curr.tags &&
+          tags.some((tag) => curr.tags.includes(tag)) &&
+          ['concepts', 'more-concepts'].some((id) => acc.includes(id))
+        ) {
+          curr.path = [...acc, curr.id].join('/');
+          relatedConcepts.push(curr);
+        }
+        if (
+          curr.tags &&
+          tags.some((tag) => curr.tags.includes(tag)) &&
+          acc.includes('recipe')
+        ) {
+          curr.path = [...acc, curr.id].join('/');
+          relatedRecipes.push(curr);
+        }
+        if (
+          curr.tags &&
+          tags.some((tag) => curr.tags.includes(tag)) &&
+          ['nx', 'workspace'].some((id) => acc.includes(id))
+        ) {
+          curr.path = [...acc, curr.id].join('/');
+          relatedReference.push(curr);
+        }
+      }
+    }
+    this.documents.itemList!.forEach((item) => {
+      recur(item, []);
+    });
+
+    if (
+      relatedConcepts.length === 0 &&
+      relatedRecipes.length === 0 &&
+      relatedReference.length === 0
+    ) {
+      return '';
+    }
+
+    let output = '## Related Documentation\n';
+
+    function listify(items: MenuItem[]): string {
+      return items
+        .map((item) => {
+          return `- [${item.name}](${item.path})`;
+        })
+        .join('\n');
+    }
+    if (relatedConcepts.length > 0) {
+      output += '### Concepts\n' + listify(relatedConcepts) + '\n';
+    }
+    if (relatedRecipes.length > 0) {
+      output += '### Recipes\n' + listify(relatedRecipes) + '\n';
+    }
+    if (relatedReference.length > 0) {
+      output += '### Reference\n' + listify(relatedReference) + '\n';
+    }
+
+    return output;
   }
 }

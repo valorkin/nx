@@ -16,6 +16,10 @@ module.exports = {
   scopes: [
     { name: 'angular', description: 'anything Angular specific' },
     { name: 'core', description: 'anything Nx core specific' },
+    {
+      name: 'bundling',
+      description: 'anything bundling specific (e.g. rollup, webpack, etc.)',
+    },
     { name: 'detox', description: 'anything Detox specific' },
     { name: 'devkit', description: 'devkit-related changes' },
     { name: 'express', description: 'anything Express specific' },
@@ -31,6 +35,7 @@ module.exports = {
     { name: 'nxdev', description: 'anything related to docs infrastructure' },
     { name: 'react', description: 'anything React specific' },
     { name: 'react-native', description: 'anything React Native specific' },
+    { name: 'expo', description: 'anything Expo specific' },
     {
       name: 'repo',
       description: 'anything related to managing the repo itself',
@@ -41,6 +46,7 @@ module.exports = {
       description: 'anything testing specific (e.g., jest or cypress)',
     },
     { name: 'web', description: 'anything Web specific' },
+    { name: 'webpack', description: 'anything Webpack specific' },
   ],
 
   allowTicketNumber: true,

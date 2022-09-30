@@ -45,16 +45,16 @@ Optionally, you can use the `--baseUrl` option if you don't want cypress plugin 
 nx g @nrwl/cypress:cypress-project your-app-name-e2e --baseUrl=http://localhost:4200
 ```
 
-Replace `your-app-name` with the app's name as defined in your `workspace.json` file.
+Replace `your-app-name` with the app's name as defined in your `tsconfig.base.json` file or the `name` property of your `package.json`.
 
 ### Testing Applications
 
 Run `nx e2e frontend-e2e` to execute e2e tests with Cypress.
 
-You can run your e2e test against a production build with the `--prod` flag
+You can run your e2e test against a production build by using the `production` [configuration](https://nx.dev/recipe/use-executor-configurations#use-executor-configurations)
 
 ```bash
-nx e2e frontend-e2e --prod
+nx e2e frontend-e2e --configuration=production
 ```
 
 By default, Cypress will run in headless mode. You will have the result of all the tests and errors (if any) in your
@@ -68,7 +68,7 @@ Running Cypress with `--watch` is a great way to enhance dev workflow - you can 
 running and Cypress will re-run those tests as you enhance and add to the suite.
 
 ```bash
-nx e2e frontend-e2e --prod
+nx e2e frontend-e2e --watch
 ```
 
 ### Specifying a Custom Url to Test

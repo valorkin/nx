@@ -16,9 +16,10 @@ import {
   Target,
   workspaceRoot,
 } from '@nrwl/devkit';
-import type { WebWebpackExecutorOptions } from '@nrwl/web/src/executors/webpack/webpack.impl';
-import { normalizeWebBuildOptions } from '@nrwl/web/src/utils/normalize';
-import { getWebConfig } from '@nrwl/web/src/utils/web.config';
+import type { WebpackExecutorOptions } from '@nrwl/webpack/src/executors/webpack/schema';
+import { normalizeOptions } from '@nrwl/webpack/src/executors/webpack/lib/normalize-options';
+import { getWebpackConfig } from '@nrwl/webpack/src/executors/webpack/lib/get-webpack-config';
+import { resolveCustomWebpackConfig } from '@nrwl/webpack/src/utils/webpack/custom-webpack';
 import { buildBaseWebpackConfig } from './webpack-fallback';
 
 /**
@@ -108,8 +109,8 @@ export function nxComponentTestingPreset(
 function withSchemaDefaults(
   target: Target,
   context: ExecutorContext
-): WebWebpackExecutorOptions {
-  const options = readTargetOptions<WebWebpackExecutorOptions>(target, context);
+): WebpackExecutorOptions {
+  const options = readTargetOptions<WebpackExecutorOptions>(target, context);
 
   options.compiler ??= 'babel';
   options.deleteOutputPath ??= true;
@@ -149,18 +150,16 @@ function buildTargetWebpack(
     Has component config? ${!!ctProjectConfig}
     `);
   }
+  const context = createExecutorContext(
+    graph,
+    buildableProjectConfig.targets,
+    parsed.project,
+    parsed.target,
+    parsed.target
+  );
 
-  const options = normalizeWebBuildOptions(
-    withSchemaDefaults(
-      parsed,
-      createExecutorContext(
-        graph,
-        buildableProjectConfig.targets,
-        parsed.project,
-        parsed.target,
-        parsed.target
-      )
-    ),
+  const options = normalizeOptions(
+    withSchemaDefaults(parsed, context),
     workspaceRoot,
     buildableProjectConfig.sourceRoot!
   );
@@ -171,13 +170,41 @@ function buildTargetWebpack(
       : options.optimization && options.optimization.scripts
       ? options.optimization.scripts
       : false;
-  return getWebConfig(
-    workspaceRoot,
-    ctProjectConfig.root,
-    ctProjectConfig.sourceRoot,
+
+  let customWebpack;
+  if (options.webpackConfig) {
+    customWebpack = resolveCustomWebpackConfig(
+      options.webpackConfig,
+      options.tsConfig
+    );
+
+    if (typeof customWebpack.then === 'function') {
+      // cypress configs have to be sync.
+      // TODO(caleb): there might be a workaround with setUpNodeEvents preprocessor?
+      logger.warn(stripIndents`Nx React Component Testing Preset currently doesn't support custom async webpack configs. 
+      Skipping the custom webpack config option '${options.webpackConfig}'`);
+      customWebpack = null;
+    }
+  }
+
+  const defaultWebpack = getWebpackConfig(
+    context,
     options,
     true,
     isScriptOptimizeOn,
-    parsed.configuration
+    {
+      root: ctProjectConfig.root,
+      sourceRoot: ctProjectConfig.sourceRoot,
+      configuration: parsed.configuration,
+    }
   );
+
+  if (customWebpack) {
+    return customWebpack(defaultWebpack, {
+      options,
+      context,
+      configuration: parsed.configuration,
+    });
+  }
+  return defaultWebpack;
 }

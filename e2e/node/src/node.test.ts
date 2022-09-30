@@ -2,6 +2,7 @@ import { stripIndents } from '@angular-devkit/core/src/utils/literals';
 import {
   checkFilesDoNotExist,
   checkFilesExist,
+  cleanupProject,
   createFile,
   expectJestTestsToPass,
   killPorts,
@@ -38,6 +39,8 @@ function getData(port): Promise<any> {
 
 describe('Node Applications', () => {
   beforeEach(() => newProject());
+
+  afterEach(() => cleanupProject());
 
   it('should be able to generate an empty application', async () => {
     const nodeapp = uniq('nodeapp');
@@ -296,7 +299,7 @@ describe('Build Node apps', () => {
     updateFile(
       `apps/${nodeapp}/src/main.ts`,
       `
-import { ${jslib} } from '@${scope}/${jslib}';   
+import { ${jslib} } from '@${scope}/${jslib}';
 console.log('Hello World!');
 ${jslib}();
 `
@@ -352,7 +355,7 @@ ${jslib}();
       const nestapp = uniq('nestapp');
       runCLI(`generate @nrwl/nest:app ${nestapp} --linter=eslint`);
 
-      packageInstall('@nestjs/swagger', undefined, '~5.0.0');
+      packageInstall('@nestjs/swagger', undefined, '^6.0.0');
 
       updateProjectConfig(nestapp, (config) => {
         config.targets.build.options.tsPlugins = ['@nestjs/swagger/plugin'];
@@ -396,16 +399,8 @@ ${jslib}();
       await runCLIAsync(`build ${nestapp}`);
 
       const mainJs = readFile(`dist/apps/${nestapp}/main.js`);
-      expect(stripIndents`${mainJs}`).toContain(
-        stripIndents`
-  class FooDto {
-      static _OPENAPI_METADATA_FACTORY() {
-          return { foo: { required: true, type: () => String }, bar: { required: true, type: () => Number } };
-      }
-  }
-  exports.FooDto = FooDto;
-          `
-      );
+      expect(mainJs).toContain('FooDto');
+      expect(mainJs).toContain('_OPENAPI_METADATA_FACTORY');
     }, 300000);
   });
 });
@@ -532,17 +527,6 @@ exports.FooModel = FooModel;
         `
     );
   }, 300000);
-
-  it('should support workspaces w/o workspace config file', async () => {
-    removeFile('workspace.json');
-    const app2 = uniq('app2');
-    runCLI(`generate @nrwl/node:app ${app2} --directory=myDir`);
-
-    runCLI(`build my-dir-${app2}`);
-    expect(() =>
-      checkFilesDoNotExist('workspace.json', 'angular.json')
-    ).not.toThrow();
-  }, 1000000);
 
   it('should run default jest tests', async () => {
     await expectJestTestsToPass('@nrwl/node:lib');

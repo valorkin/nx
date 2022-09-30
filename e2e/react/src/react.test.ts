@@ -1,12 +1,12 @@
 import {
   checkFilesDoNotExist,
   checkFilesExist,
+  cleanupProject,
   createFile,
   expectJestTestsToPass,
   killPorts,
   newProject,
   readFile,
-  renameFile,
   runCLI,
   runCLIAsync,
   runCypressTests,
@@ -20,6 +20,8 @@ describe('React Applications', () => {
   let proj: string;
 
   beforeEach(() => (proj = newProject()));
+
+  afterEach(() => cleanupProject());
 
   it('should be able to generate a react app + lib', async () => {
     const appName = uniq('app');
@@ -80,7 +82,7 @@ describe('React Applications', () => {
     checkFilesExist(...filesToCheck);
 
     expect(readFile(`dist/apps/${appName}/index.html`)).toContain(
-      `<script src="main.esm.js" type="module"></script><script src="main.es5.js" nomodule defer></script>`
+      `<script src="main.js" type="module"></script><script src="main.es5.js" nomodule defer></script>`
     );
   }, 250_000);
 
@@ -125,13 +127,13 @@ describe('React Applications', () => {
     );
     const filesToCheck = [
       `dist/apps/${appName}/index.html`,
-      `dist/apps/${appName}/runtime.esm.js`,
-      `dist/apps/${appName}/polyfills.esm.js`,
-      `dist/apps/${appName}/main.esm.js`,
+      `dist/apps/${appName}/runtime.js`,
+      `dist/apps/${appName}/polyfills.js`,
+      `dist/apps/${appName}/main.js`,
     ];
 
     if (opts.checkSourceMap) {
-      filesToCheck.push(`dist/apps/${appName}/main.esm.js.map`);
+      filesToCheck.push(`dist/apps/${appName}/main.js.map`);
     }
 
     if (opts.checkStyles) {
@@ -214,9 +216,9 @@ describe('React Applications: additional packages', () => {
 
     checkFilesExist(
       `dist/apps/${appName}/index.html`,
-      `dist/apps/${appName}/runtime.esm.js`,
-      `dist/apps/${appName}/polyfills.esm.js`,
-      `dist/apps/${appName}/main.esm.js`
+      `dist/apps/${appName}/runtime.js`,
+      `dist/apps/${appName}/polyfills.js`,
+      `dist/apps/${appName}/main.js`
     );
   }, 250_000);
 

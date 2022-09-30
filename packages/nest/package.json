@@ -1,7 +1,8 @@
 {
   "name": "@nrwl/nest",
   "version": "0.0.1",
-  "description": "The Nx Plugin for Nest that contains executors and generators for allowing your workspace to create powerful Nest best in class APIs.",
+  "private": false,
+  "description": "The Nx Plugin for Nest contains executors and generators for allowing your workspace to create powerful Nest best in class APIs.",
   "repository": {
     "type": "git",
     "url": "https://github.com/nrwl/nx.git",
@@ -31,9 +32,11 @@
   "dependencies": {
     "@nestjs/schematics": "^9.0.0",
     "@nrwl/devkit": "file:../devkit",
-    "@nrwl/jest": "file:../jest",
     "@nrwl/js": "file:../js",
     "@nrwl/linter": "file:../linter",
     "@nrwl/node": "file:../node"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

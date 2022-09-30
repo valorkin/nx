@@ -39,7 +39,7 @@
 
 ## Generators
 
-- [Workspace Generators](/recipe/workspace-generators)
+- [Local Generators](/recipe/local-generators)
 - [Composing Generators](/recipe/composing-generators)
 - [Generator Options](/recipe/generator-options)
 - [Creating Files](/recipe/creating-files)
@@ -61,6 +61,12 @@
 - [Faster Builds with Module Federation](/recipe/faster-builds)
 - [Advanced Micro Frontends with Angular using Dynamic Federation](/recipe/dynamic-module-federation-with-angular)
 - [Nx Micro-Frontend Example](/recipe/nx-examples)
+
+## Storybook
+
+- [Publishing Storybook: One main Storybook instance for all projects](/recipe/one-storybook-for-all)
+- [Publishing Storybook: One Storybook instance per scope](/recipe/one-storybook-per-scope)
+- [Publishing Storybook: One main Storybook instance using Storybook Composition](/recipe/one-storybook-with-composition)
 
 ## Other
 

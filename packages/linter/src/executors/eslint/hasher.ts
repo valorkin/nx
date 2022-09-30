@@ -27,8 +27,12 @@ export default async function run(
   );
 
   const command = res.details['command'];
-  const selfSource =
-    res.details.nodes[`${task.target.project}:$filesets:default`];
+  let selfSource = '';
+  for (let n of Object.keys(res.details)) {
+    if (n.startsWith(`${task.target.project}:`)) {
+      selfSource = res.details.nodes[n];
+    }
+  }
 
   const nodes = {};
   const hashes = [] as string[];
@@ -52,6 +56,9 @@ function allDeps(
   taskGraph: TaskGraph,
   projectGraph: ProjectGraph
 ): string[] {
+  if (!taskGraph.tasks) {
+    return [];
+  }
   const project = taskGraph.tasks[taskId].target.project;
   const dependencies = projectGraph.dependencies[project]
     .filter((d) => !!projectGraph.nodes[d.target])

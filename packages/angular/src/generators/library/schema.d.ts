@@ -1,8 +1,6 @@
 import { UnitTestRunner } from '../../utils/test-runners';
 import { Linter } from '@nrwl/linter';
 
-type AngularLinter = Exclude<Linter, Linter.TsLint>;
-
 export interface Schema {
   name: string;
   addTailwind?: boolean;
@@ -21,10 +19,10 @@ export interface Schema {
   prefix?: string;
   routing?: boolean;
   lazy?: boolean;
-  parentModule?: string;
+  parent?: string;
   tags?: string;
   strict?: boolean;
-  linter?: AngularLinter;
+  linter?: Linter;
   unitTestRunner?: UnitTestRunner;
   compilationMode?: 'full' | 'partial';
   setParserOptionsProject?: boolean;

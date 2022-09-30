@@ -60,7 +60,6 @@ describe('Move Angular Project', () => {
     expect(moveOutput).toContain(
       `CREATE apps/${newPath}/src/environments/environment.ts`
     );
-    expect(moveOutput).toContain(`UPDATE workspace.json`);
   });
 
   /**
@@ -152,7 +151,7 @@ export default defineConfig({
     const lib2FilePath = `libs/${lib2}/src/lib/${lib2}.module.ts`;
     const lib2File = readFile(lib2FilePath);
     expect(lib2File).toContain(
-      `import { ${newModule} } from '@${proj}/shared-${lib1}';`
+      `import { ${newModule} } from '@${proj}/shared/${lib1}';`
     );
     expect(lib2File).toContain(`extends ${newModule}`);
   });

@@ -360,9 +360,10 @@ describe('app', () => {
       await generateApp(appTree, 'myApp', { directory: 'src/9-websites' });
 
       // ASSERT
-      const workspaceJson = readJson(appTree, '/workspace.json');
 
-      expect(workspaceJson.projects['src-9-websites-my-app']).toMatchSnapshot();
+      expect(
+        readProjectConfiguration(appTree, 'src-9-websites-my-app').root
+      ).toMatchSnapshot();
     });
 
     it('should generate files', async () => {
@@ -928,99 +929,6 @@ describe('app', () => {
     });
   });
 
-  describe('--mf', () => {
-    test.each(['host', 'remote'])(
-      'should generate a Module Federation correctly for a each app',
-      async (type: 'host' | 'remote') => {
-        await generateApp(appTree, 'my-app', { mf: true, mfType: type });
-
-        expect(appTree.exists(`apps/my-app/webpack.config.js`)).toBeTruthy();
-        expect(
-          appTree.exists(`apps/my-app/webpack.prod.config.js`)
-        ).toBeTruthy();
-        expect(
-          appTree.read(`apps/my-app/webpack.config.js`, 'utf-8')
-        ).toMatchSnapshot();
-      }
-    );
-
-    test.each(['host', 'remote'])(
-      'should update the builder to use webpack-browser',
-      async (type: 'host' | 'remote') => {
-        await generateApp(appTree, 'my-app', { mf: true, mfType: type });
-
-        const projectConfig = readProjectConfiguration(appTree, 'my-app');
-
-        expect(projectConfig.targets.build.executor).toEqual(
-          '@nrwl/angular:webpack-browser'
-        );
-      }
-    );
-
-    it('should add a remote application and add it to a specified host applications webpack config when no other remote has been added to it', async () => {
-      // ARRANGE
-      await generateApp(appTree, 'app1', {
-        mf: true,
-        mfType: 'host',
-      });
-
-      // ACT
-      await generateApp(appTree, 'remote1', {
-        mf: true,
-        mfType: 'remote',
-        host: 'app1',
-      });
-
-      // ASSERT
-      const hostWebpackConfig = appTree.read(
-        'apps/app1/webpack.config.js',
-        'utf-8'
-      );
-      expect(hostWebpackConfig).toMatchSnapshot();
-    });
-
-    it('should add a remote application and add it to a specified host applications webpack config that contains a remote application already', async () => {
-      // ARRANGE
-      await generateApp(appTree, 'app1', {
-        mf: true,
-        mfType: 'host',
-      });
-
-      await generateApp(appTree, 'remote1', {
-        mf: true,
-        mfType: 'remote',
-        host: 'app1',
-        port: 4201,
-      });
-
-      // ACT
-      await generateApp(appTree, 'remote2', {
-        mf: true,
-        mfType: 'remote',
-        host: 'app1',
-        port: 4202,
-      });
-
-      // ASSERT
-      const hostWebpackConfig = appTree.read(
-        'apps/app1/webpack.config.js',
-        'utf-8'
-      );
-      expect(hostWebpackConfig).toMatchSnapshot();
-    });
-
-    it('should add a port to a non-mf app', async () => {
-      // ACT
-      await generateApp(appTree, 'app1', {
-        port: 4205,
-      });
-
-      // ASSERT
-      const projectConfig = readProjectConfiguration(appTree, 'app1');
-      expect(projectConfig.targets.serve.options.port).toBe(4205);
-    });
-  });
-
   describe('--add-tailwind', () => {
     it('should not add a tailwind.config.js and relevant packages when "--add-tailwind" is not specified', async () => {
       // ACT
@@ -1056,6 +964,7 @@ describe('app', () => {
         "const { createGlobPatternsForDependencies } = require('@nrwl/angular/tailwind');
         const { join } = require('path');
 
+        /** @type {import('tailwindcss').Config} */
         module.exports = {
           content: [
             join(__dirname, 'src/**/!(*.stories|*.spec).{ts,html}'),
@@ -1086,6 +995,9 @@ describe('app', () => {
       // ASSERT
       expect(
         appTree.read('apps/standalone/src/main.ts', 'utf-8')
+      ).toMatchSnapshot();
+      expect(
+        appTree.read('apps/standalone/src/app/app.routes.ts', 'utf-8')
       ).toMatchSnapshot();
       expect(
         appTree.read('apps/standalone/src/app/app.component.ts', 'utf-8')

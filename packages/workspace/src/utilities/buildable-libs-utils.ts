@@ -1,12 +1,12 @@
-import { dirname, join, relative, resolve } from 'path';
+import { dirname, join, relative } from 'path';
 import { directoryExists, fileExists } from './fileutils';
 import type { ProjectGraph, ProjectGraphProjectNode } from '@nrwl/devkit';
 import {
+  getOutputsForTargetAndConfiguration,
   ProjectGraphExternalNode,
   readJsonFile,
   stripIndents,
   writeJsonFile,
-  getOutputsForTargetAndConfiguration,
 } from '@nrwl/devkit';
 import * as ts from 'typescript';
 import { unlinkSync } from 'fs';
@@ -128,6 +128,14 @@ function collectDependencies(
 ): { name: string; isTopLevel: boolean }[] {
   (projGraph.dependencies[project] || []).forEach((dependency) => {
     if (!acc.some((dep) => dep.name === dependency.target)) {
+      // Temporary skip this. Currently the set of external nodes is built from package.json, not lock file.
+      // As a result, some nodes might be missing. This should not cause any issues, we can just skip them.
+      if (
+        dependency.target.startsWith('npm:') &&
+        !projGraph.externalNodes[dependency.target]
+      )
+        return;
+
       acc.push({ name: dependency.target, isTopLevel: areTopLevelDeps });
       if (!shallow) {
         collectDependencies(dependency.target, projGraph, acc, shallow, false);
@@ -163,8 +171,14 @@ function readTsConfigWithRemappedPaths(
   return generatedTsConfig;
 }
 
+/**
+ * Util function to create tsconfig compilerOptions object with support for workspace libs paths.
+ *
+ * @param tsConfig String of config path or object parsed via ts.parseJsonConfigFileContent.
+ * @param dependencies Dependencies calculated by Nx.
+ */
 export function computeCompilerOptionsPaths(
-  tsConfig: string,
+  tsConfig: string | ts.ParsedCommandLine,
   dependencies: DependentBuildableProjectNode[]
 ) {
   const paths = readPaths(tsConfig) || {};
@@ -172,16 +186,21 @@ export function computeCompilerOptionsPaths(
   return paths;
 }
 
-function readPaths(tsConfig: string) {
+function readPaths(tsConfig: string | ts.ParsedCommandLine) {
   try {
-    const parsedTSConfig = ts.readConfigFile(tsConfig, ts.sys.readFile).config;
-    if (
-      parsedTSConfig.compilerOptions &&
-      parsedTSConfig.compilerOptions.paths
-    ) {
-      return parsedTSConfig.compilerOptions.paths;
-    } else if (parsedTSConfig.extends) {
-      return readPaths(resolve(dirname(tsConfig), parsedTSConfig.extends));
+    let config: ts.ParsedCommandLine;
+    if (typeof tsConfig === 'string') {
+      const configFile = ts.readConfigFile(tsConfig, ts.sys.readFile);
+      config = ts.parseJsonConfigFileContent(
+        configFile.config,
+        ts.sys,
+        dirname(tsConfig)
+      );
+    } else {
+      config = tsConfig;
+    }
+    if (config.options?.paths) {
+      return config.options.paths;
     } else {
       return null;
     }
@@ -237,8 +256,8 @@ export function checkDependentProjectsHaveBeenBuilt(
       It looks like all of ${projectName}'s dependencies have not been built yet:
       ${missing.map((x) => ` - ${x.node.name}`).join('\n')}
 
-      You might be missing a "targetDefaults" configuration in your root nx.json (https://nx.dev/configuration/projectjson#target-defaults),
-      or "dependsOn" configured in ${projectName}'s project.json (https://nx.dev/configuration/projectjson#dependson) 
+      You might be missing a "targetDefaults" configuration in your root nx.json (https://nx.dev/reference/project-configuration#target-defaults),
+      or "dependsOn" configured in ${projectName}'s project.json (https://nx.dev/reference/project-configuration#dependson) 
     `);
     return false;
   } else {

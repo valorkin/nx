@@ -8,7 +8,6 @@ import {
   names,
   PackageManager,
   Tree,
-  updateJson,
 } from '@nrwl/devkit';
 
 import { join } from 'path';
@@ -18,6 +17,7 @@ import { workspaceGenerator } from '../workspace/workspace';
 import { nxVersion } from '../../utils/versions';
 import { Preset } from '../utils/presets';
 import { getNpmPackageVersion } from '../utils/get-npm-package-version';
+import { Linter } from '../../utils/lint';
 
 export interface Schema {
   cli: 'nx' | 'angular';
@@ -30,7 +30,7 @@ export interface Schema {
   nxCloud?: boolean;
   preset: string;
   defaultBase: string;
-  linter: 'tslint' | 'eslint';
+  linter: Linter;
   packageManager?: PackageManager;
 }
 
@@ -142,7 +142,6 @@ export async function newGenerator(host: Tree, options: Schema) {
 
   await workspaceGenerator(host, { ...options, nxCloud: undefined } as any);
 
-  setDefaultLinter(host, options);
   addPresetDependencies(host, options);
   addCloudDependencies(host, options);
 
@@ -205,6 +204,9 @@ function getPresetDependencies(preset: string, version?: string) {
     case Preset.ReactNative:
       return { dependencies: {}, dev: { '@nrwl/react-native': nxVersion } };
 
+    case Preset.Expo:
+      return { dependencies: {}, dev: { '@nrwl/expo': nxVersion } };
+
     case Preset.WebComponents:
       return { dependencies: {}, dev: { '@nrwl/web': nxVersion } };
 
@@ -256,85 +258,4 @@ function normalizeOptions(options: NormalizedSchema): NormalizedSchema {
   }
 
   return options;
-}
-
-function setDefaultLinter(host: Tree, options: Schema) {
-  const { linter, preset } = options;
-  // Don't do anything if someone doesn't pick angular
-  if (preset !== Preset.Angular && preset !== Preset.AngularWithNest) {
-    return;
-  }
-
-  switch (linter) {
-    case 'eslint': {
-      setESLintDefault(host, options);
-      break;
-    }
-    case 'tslint': {
-      setTSLintDefault(host, options);
-      break;
-    }
-  }
-}
-
-/**
- * This sets ESLint as the default for any schematics that default to TSLint
- */
-function setESLintDefault(host: Tree, options: Schema) {
-  updateJson(host, getWorkspacePath(host, options), (json) => {
-    setDefault(json, '@nrwl/angular', 'application', 'linter', 'eslint');
-    setDefault(json, '@nrwl/angular', 'library', 'linter', 'eslint');
-    setDefault(
-      json,
-      '@nrwl/angular',
-      'storybook-configuration',
-      'linter',
-      'eslint'
-    );
-    return json;
-  });
-}
-
-/**
- * This sets TSLint as the default for any schematics that default to ESLint
- */
-function setTSLintDefault(host: Tree, options: Schema) {
-  updateJson(host, getWorkspacePath(host, options), (json) => {
-    setDefault(json, '@nrwl/workspace', 'library', 'linter', 'tslint');
-    setDefault(json, '@nrwl/cypress', 'cypress-project', 'linter', 'tslint');
-    setDefault(json, '@nrwl/cypress', 'cypress-project', 'linter', 'tslint');
-    setDefault(json, '@nrwl/node', 'application', 'linter', 'tslint');
-    setDefault(json, '@nrwl/node', 'library', 'linter', 'tslint');
-    setDefault(json, '@nrwl/nest', 'application', 'linter', 'tslint');
-    setDefault(json, '@nrwl/nest', 'library', 'linter', 'tslint');
-    setDefault(json, '@nrwl/express', 'application', 'linter', 'tslint');
-    setDefault(json, '@nrwl/express', 'library', 'linter', 'tslint');
-
-    return json;
-  });
-}
-
-function getWorkspacePath(host: Tree, { directory, cli }: Schema) {
-  return join(directory, cli === 'angular' ? 'angular.json' : 'workspace.json');
-}
-
-function setDefault(
-  json: any,
-  collectionName: string,
-  generatorName: string,
-  key: string,
-  value: any
-) {
-  if (!json.schematics) json.schematics = {};
-  if (
-    json.schematics[collectionName] &&
-    json.schematics[collectionName][generatorName]
-  ) {
-    json.schematics[collectionName][generatorName][key] = value;
-  } else if (json.schematics[`${collectionName}:${generatorName}`]) {
-    json.schematics[`${collectionName}:${generatorName}`][key] = value;
-  } else {
-    json.schematics[collectionName] = json.schematics[collectionName] || {};
-    json.schematics[collectionName][generatorName] = { [key]: value };
-  }
 }

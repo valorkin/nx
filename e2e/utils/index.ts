@@ -1,4 +1,5 @@
 import {
+  createProjectGraphAsync,
   joinPathFragments,
   parseJson,
   ProjectConfiguration,
@@ -89,10 +90,17 @@ export function updateProjectConfig(
   projectName: string,
   callback: (c: ProjectConfiguration) => ProjectConfiguration
 ) {
-  const root = readJson(workspaceConfigName()).projects[projectName];
+  const workspace = readResolvedWorkspaceConfiguration();
+  const root = workspace.projects[projectName].root;
   const path = join(root, 'project.json');
   const current = readJson(path);
   updateFile(path, JSON.stringify(callback(current), null, 2));
+}
+
+export function readResolvedWorkspaceConfiguration() {
+  process.env.NX_PROJECT_GLOB_CACHE = 'false';
+  const ws = new Workspaces(tmpProjPath());
+  return ws.readWorkspaceConfiguration();
 }
 
 /**
@@ -109,7 +117,7 @@ export function readWorkspaceConfig(): Omit<
 }
 
 export function readProjectConfig(projectName: string): ProjectConfiguration {
-  const root = readJson(workspaceConfigName()).projects[projectName];
+  const root = readResolvedWorkspaceConfiguration().projects[projectName].root;
   const path = join(root, 'project.json');
   return readJson(path);
 }
@@ -137,6 +145,7 @@ export function runCreateWorkspace(
     extraArgs,
     ci,
     useDetectedPm = false,
+    cwd = e2eCwd,
   }: {
     preset: string;
     appName?: string;
@@ -147,6 +156,7 @@ export function runCreateWorkspace(
     extraArgs?: string;
     ci?: 'azure' | 'github' | 'circleci';
     useDetectedPm?: boolean;
+    cwd?: string;
   }
 ) {
   projName = name;
@@ -179,10 +189,10 @@ export function runCreateWorkspace(
   }
 
   const create = execSync(command, {
-    cwd: e2eCwd,
+    cwd,
     // stdio: [0, 1, 2],
     stdio: ['pipe', 'pipe', 'pipe'],
-    env: process.env,
+    env: { CI: 'true', ...process.env },
     encoding: 'utf-8',
   });
   return create ? create.toString() : '';
@@ -301,10 +311,12 @@ export function newProject({
         );
       }
 
+      // TODO(jack): we should tag the projects (e.g. tags: ['package']) and filter from that rather than hard-code packages.
       const packages = [
         `@nrwl/angular`,
         `@nrwl/eslint-plugin-nx`,
         `@nrwl/express`,
+        `@nrwl/esbuild`,
         `@nrwl/jest`,
         `@nrwl/js`,
         `@nrwl/linter`,
@@ -312,10 +324,13 @@ export function newProject({
         `@nrwl/next`,
         `@nrwl/node`,
         `@nrwl/nx-plugin`,
+        `@nrwl/rollup`,
         `@nrwl/react`,
         `@nrwl/storybook`,
         `@nrwl/web`,
+        `@nrwl/webpack`,
         `@nrwl/react-native`,
+        `@nrwl/expo`,
       ];
       packageInstall(packages.join(` `), projScope);
 
@@ -373,8 +388,10 @@ export async function killPorts(port?: number): Promise<boolean> {
 }
 
 // Useful in order to cleanup space during CI to prevent `No space left on device` exceptions
-export async function cleanupProject() {
+export async function cleanupProject(opts?: RunCmdOpts) {
   if (isCI) {
+    // Stopping the daemon is not required for tests to pass, but it cleans up background processes
+    runCLI('reset', opts);
     try {
       removeSync(tmpProjPath());
     } catch (e) {}
@@ -414,6 +431,7 @@ export function runCommandAsync(
       {
         cwd: tmpProjPath(),
         env: {
+          CI: 'true',
           ...(opts.env || process.env),
           FORCE_COLOR: 'false',
         },
@@ -441,6 +459,7 @@ export function runCommandUntil(
   const p = exec(`${pm.runNx} ${command}`, {
     cwd: tmpProjPath(),
     env: {
+      CI: 'true',
       ...process.env,
       FORCE_COLOR: 'false',
     },
@@ -533,7 +552,7 @@ export function runCLI(
     let r = stripConsoleColors(
       execSync(`${pm.runNx} ${command}`, {
         cwd: opts.cwd || tmpProjPath(),
-        env: { ...(opts.env || process.env) },
+        env: { CI: 'true', ...(opts.env || process.env) },
         encoding: 'utf-8',
         maxBuffer: 50 * 1024 * 1024,
       })

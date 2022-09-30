@@ -1,10 +1,10 @@
 import {
   checkFilesDoNotExist,
   checkFilesExist,
+  cleanupProject,
   e2eCwd,
   expectNoAngularDevkit,
   expectNoTsJestInJestConfig,
-  getPackageManagerCommand,
   getSelectedPackageManager,
   packageManagerLockFile,
   readJson,
@@ -15,10 +15,11 @@ import {
   updateJson,
 } from '@nrwl/e2e/utils';
 import { existsSync, mkdirSync } from 'fs-extra';
-import { execSync } from 'child_process';
 
 describe('create-nx-workspace', () => {
   const packageManager = getSelectedPackageManager() || 'pnpm';
+
+  afterEach(() => cleanupProject());
 
   it('should be able to create an empty workspace built for apps', () => {
     const wsName = uniq('apps');
@@ -28,7 +29,6 @@ describe('create-nx-workspace', () => {
     });
 
     checkFilesExist(
-      'workspace.json',
       'package.json',
       packageManagerLockFile[packageManager],
       'apps/.gitkeep',
@@ -38,7 +38,7 @@ describe('create-nx-workspace', () => {
       .filter((pm) => pm !== packageManager)
       .map((pm) => packageManagerLockFile[pm]);
 
-    checkFilesDoNotExist(...foreignLockFiles);
+    checkFilesDoNotExist(...foreignLockFiles, 'workspace.json');
 
     expectNoAngularDevkit();
   });
@@ -190,6 +190,30 @@ describe('create-nx-workspace', () => {
     expectNoAngularDevkit();
   });
 
+  it('should be able to create react-native workspace', () => {
+    const wsName = uniq('react-native');
+    const appName = uniq('app');
+    runCreateWorkspace(wsName, {
+      preset: 'react-native',
+      appName,
+      packageManager: 'npm',
+    });
+
+    expectNoAngularDevkit();
+  });
+
+  it('should be able to create an expo workspace', () => {
+    const wsName = uniq('expo');
+    const appName = uniq('app');
+    runCreateWorkspace(wsName, {
+      preset: 'expo',
+      appName,
+      packageManager: 'npm',
+    });
+
+    expectNoAngularDevkit();
+  });
+
   it('should be able to create a workspace with a custom base branch and HEAD', () => {
     const wsName = uniq('branch');
     runCreateWorkspace(wsName, {
@@ -217,26 +241,6 @@ describe('create-nx-workspace', () => {
       appName,
       packageManager,
     });
-  });
-
-  it('should handle spaces in workspace path', () => {
-    const wsName = uniq('empty');
-
-    const tmpDir = `${e2eCwd}/${uniq('with space')}`;
-
-    mkdirSync(tmpDir, { recursive: true });
-
-    const createCommand = getPackageManagerCommand({
-      packageManager,
-    }).createWorkspace;
-    const fullCommand = `${createCommand} ${wsName} --cli=nx --preset=apps --no-nxCloud --no-interactive`;
-    execSync(fullCommand, {
-      cwd: tmpDir,
-      stdio: [0, 1, 2],
-      env: process.env,
-    });
-
-    expect(existsSync(`${tmpDir}/${wsName}/package.json`)).toBeTruthy();
   });
 
   it('should respect package manager preference', () => {
@@ -337,5 +341,25 @@ describe('create-nx-workspace', () => {
         process.env.SELECTED_PM = packageManager;
       }, 90000);
     }
+  });
+});
+
+describe('create-nx-workspace custom parent folder', () => {
+  const tmpDir = `${e2eCwd}/${uniq('with space')}`;
+  const wsName = uniq('empty');
+  const packageManager = getSelectedPackageManager() || 'pnpm';
+
+  afterEach(() => cleanupProject({ cwd: `${tmpDir}/${wsName}` }));
+
+  it('should handle spaces in workspace path', () => {
+    mkdirSync(tmpDir, { recursive: true });
+
+    runCreateWorkspace(wsName, {
+      preset: 'apps',
+      packageManager,
+      cwd: tmpDir,
+    });
+
+    expect(existsSync(`${tmpDir}/${wsName}/package.json`)).toBeTruthy();
   });
 });

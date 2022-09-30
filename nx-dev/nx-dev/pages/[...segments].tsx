@@ -215,9 +215,14 @@ export const getStaticProps: GetStaticProps = async ({
     };
   }
 
-  let document: DocumentData | undefined;
+  let document: DocumentData | null = null;
   try {
     document = documentsApi.getDocument(params.segments);
+  } catch (e) {
+    // Do nothing
+  }
+  try {
+    if (!document) document = documentsApi.getDocumentIndex(params.segments);
   } catch (e) {
     // Do nothing
   }

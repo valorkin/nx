@@ -7,8 +7,8 @@ width="100%" /%}
 
 In this tutorial you use Nx to build a server application out of common libraries using modern technologies.
 
-{% callout type="note" title="Plugins for a rich developer experience" %}
-In this tutorial, we use several Nx plugins to provide a rich developer experience that do most of the work for you. **All the plugins are optional.**
+{% callout type="check" title="Integrated Repo" %}
+This tutorial sets up an [integrated repo](/concepts/integrated-vs-package-based). If you prefer a [package-based repo](/concepts/integrated-vs-package-based), check out the [Core Tutorial](/getting-started/core-tutorial).
 {% /callout %}
 
 ## Contents
@@ -70,8 +70,7 @@ myorg/
 ├── nx.json
 ├── package.json
 ├── README.md
-├── tsconfig.base.json
-└── workspace.json
+└── tsconfig.base.json
 ```
 
 The generate command added one project to our workspace:

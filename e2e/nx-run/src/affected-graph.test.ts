@@ -2,23 +2,22 @@ import type { NxJsonConfiguration } from '@nrwl/devkit';
 import {
   getPackageManagerCommand,
   isNotWindows,
-  listFiles,
   newProject,
   readFile,
   readJson,
   readProjectConfig,
   cleanupProject,
-  rmDist,
   runCLI,
   runCLIAsync,
   runCommand,
   uniq,
   updateFile,
   updateProjectConfig,
-  workspaceConfigName,
   checkFilesExist,
   isWindows,
   fileExists,
+  removeFile,
+  readResolvedWorkspaceConfiguration,
 } from '@nrwl/e2e/utils';
 
 describe('Nx Affected and Graph Tests', () => {
@@ -46,7 +45,7 @@ describe('Nx Affected and Graph Tests', () => {
       updateFile(
         `apps/${myapp}/src/app/app.element.spec.ts`,
         `
-              import '@${proj}/${mylib}';
+              import * as x from '@${proj}/${mylib}';
               describe('sample test', () => {
                 it('should test', () => {
                   expect(1).toEqual(1);
@@ -57,7 +56,7 @@ describe('Nx Affected and Graph Tests', () => {
       updateFile(
         `libs/${mypublishablelib}/src/lib/${mypublishablelib}.spec.ts`,
         `
-              import '@${proj}/${mylib}';
+              import * as x from '@${proj}/${mylib}';
               describe('sample test', () => {
                 it('should test', () => {
                   expect(1).toEqual(1);
@@ -253,11 +252,8 @@ describe('Nx Affected and Graph Tests', () => {
 
     it('should affect all projects by removing projects', () => {
       generateAll();
-      updateFile(workspaceConfigName(), (old) => {
-        const workspaceJson = JSON.parse(old);
-        delete workspaceJson.projects[mylib];
-        return JSON.stringify(workspaceJson, null, 2);
-      });
+      const root = readResolvedWorkspaceConfiguration().projects[mylib].root;
+      removeFile(root);
       expect(runCLI('affected:apps')).toContain(myapp);
       expect(runCLI('affected:apps')).toContain(myapp2);
       expect(runCLI('affected:libs')).not.toContain(mylib);
@@ -580,9 +576,9 @@ describe('Nx Affected and Graph Tests', () => {
 
       expect(() => checkFilesExist('project-graph.html')).not.toThrow();
       expect(() => checkFilesExist('static/styles.css')).not.toThrow();
-      expect(() => checkFilesExist('static/runtime.esm.js')).not.toThrow();
-      expect(() => checkFilesExist('static/polyfills.esm.js')).not.toThrow();
-      expect(() => checkFilesExist('static/main.esm.js')).not.toThrow();
+      expect(() => checkFilesExist('static/runtime.js')).not.toThrow();
+      expect(() => checkFilesExist('static/polyfills.js')).not.toThrow();
+      expect(() => checkFilesExist('static/main.js')).not.toThrow();
       expect(() => checkFilesExist('static/environment.js')).not.toThrow();
 
       const environmentJs = readFile('static/environment.js');

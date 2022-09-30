@@ -2,6 +2,10 @@
 
 In this tutorial you create multiple projects in a monorepo and take advantage of the core Nx features with a minimum of configuration.
 
+{% callout type="check" title="Package-Based Repo" %}
+This tutorial sets up a [package-based repo](/concepts/integrated-vs-package-based). If you prefer an [integrated repo](/concepts/integrated-vs-package-based), check out the [React](/getting-started/react-tutorial), [Angular](/getting-started/angular-tutorial) or [Node](/getting-started/node-tutorial) tutorials.
+{% /callout %}
+
 ## Contents:
 
 - [1 - Create Blog](/core-tutorial/01-create-blog)
@@ -60,7 +64,7 @@ To install Eleventy run:
 {% tab label="yarn" %}
 
 ```bash
-yarn add -D @11ty/eleventy@1.0.0
+yarn add -D -W @11ty/eleventy@1.0.0
 ```
 
 {% /tab %}
@@ -100,6 +104,10 @@ Next, add `packages/blog/src/index.html`:
 ```html
 <p>Hello, Eleventy</p>
 ```
+
+## Clean Up
+
+If you have a `workspace.json` file in the root, delete it.
 
 ## Running Eleventy with Nx
 

@@ -1,11 +1,14 @@
 import { stripIndents } from '@nrwl/devkit';
 import {
   checkFilesExist,
+  cleanupProject,
+  getSelectedPackageManager,
   killPort,
   newProject,
   readProjectConfig,
   runCLI,
   runCLIAsync,
+  runCommand,
   uniq,
   updateFile,
 } from '@nrwl/e2e/utils';
@@ -14,6 +17,8 @@ describe('React Module Federation', () => {
   let proj: string;
 
   beforeEach(() => (proj = newProject()));
+
+  afterEach(() => cleanupProject());
 
   it('should generate host and remote apps', async () => {
     const shell = uniq('shell');
@@ -89,7 +94,7 @@ describe('React Module Federation', () => {
       `
     );
 
-    const e2eResults = runCLI(`e2e ${shell}-e2e --no-watch`);
+    const e2eResults = runCLI(`e2e ${shell}-e2e --no-watch --verbose`);
     expect(e2eResults).toContain('All specs passed!');
     expect(
       await killPorts([

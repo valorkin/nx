@@ -33,9 +33,8 @@
     "linter": {
       "description": "The tool to use for running lint checks.",
       "type": "string",
-      "enum": ["eslint", "tslint"],
-      "default": "eslint",
-      "x-deprecated": "TSLint support is deprecated and will be removed"
+      "enum": ["eslint"],
+      "default": "eslint"
     },
     "unitTestRunner": {
       "type": "string",
@@ -62,6 +61,12 @@
       "type": "boolean",
       "default": false,
       "description": "Do not eslint configuration for plugin json files."
+    },
+    "e2eTestRunner": {
+      "type": "string",
+      "enum": ["jest", "none"],
+      "description": "Test runner to use for end to end (E2E) tests.",
+      "default": "jest"
     },
     "standaloneConfig": {
       "description": "Split the project configuration into `<projectRoot>/project.json` rather than including it inside `workspace.json`.",

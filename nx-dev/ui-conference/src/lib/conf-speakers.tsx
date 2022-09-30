@@ -86,6 +86,54 @@ export function ConfSpeakers(): JSX.Element {
       name: 'James Henry',
       twitter: 'MrJamesHenry',
     },
+    {
+      description:
+        "Miro is a senior engineer at Nrwl.io and a core member of the Nx team. He's interested in the front end of things, helping companies build scalable and performant applications. He enjoys sharing with the community, speaking, contributing to open source, and organizing events. Miro is co-founder of Angular Austria and co-organizer of Angular Vienna and ViennaJS meetups.",
+      imageUrl: '/images/conf/miro.webp',
+      name: 'Miroslav Jonas',
+      twitter: 'meeroslav',
+    },
+    {
+      description:
+        'Zack is a Google Developer Expert in Angular, and a Senior Engineer and Engineering Manager for Nrwl, living in the desserts of San Tan Valley, Arizona. Zack particularly enjoys teaching other engineers, breaking down problems into manageable pieces, and building awesome stuff.',
+      imageUrl: '/images/conf/zack-derose.webp',
+      name: 'Zack DeRose',
+      twitter: 'zackderose',
+    },
+    {
+      description:
+        'Senior Software Engineer at Nrwl, Nx core team, open source contributor, GDE for Angular/Web Technologies/Google Maps platform, WTM Ambassador, AngularAthens meetup co-founder. Mentoring women into tech, speaking about the cool things I do, climbing mountains and serving cats for life. More at psyber.city.',
+      imageUrl: '/images/conf/katerina-skroumpelou.webp',
+      name: 'Katerina Skroumpelou',
+      twitter: 'psybercity',
+    },
+    {
+      description:
+        'Philip Fulcher is a senior engineer with Nrwl and an Nx core team member. He works with Fortune 500 clients to modernize their development practices with a monorepo approach. Philip lives in Colorado with his wife (who is much smarter than him) and two great kids.',
+      imageUrl: '/images/conf/philip-fulcher.webp',
+      name: 'Philip Fulcher',
+      twitter: 'philipjfulcher',
+    },
+    {
+      description:
+        'Mike Ryan is a principal architect at LiveLoveApp, helping companies find absolute joy in shipping apps. He is a Google Developer Expert in Web Technologies and one of the co-creators of NgRx, an open-source collection of high-quality reactive extensions for Angular.',
+      imageUrl: '/images/conf/mike-ryan.webp',
+      name: 'Mike Ryan',
+      twitter: 'MikeRyanDev',
+    },
+    {
+      description:
+        'Based out of State College, PA, Ryan is an Engineering Architect at Cisco, where he works in the Customer and Partner Experience team to help drive engineering excellence using Nx, Angular, and NgRx.  Outside of work, he enjoys spending time with his family, enjoying various sports, and the outdoors.',
+      imageUrl: '/images/conf/ryan-diehl.webp',
+      name: 'Ryan Diehl',
+      twitter: 'DiehlWithRyan',
+    },
+    {
+      description: 'Senior Engineer II @ Carvana',
+      imageUrl: '/images/conf/kennie-davis.webp',
+      name: 'Kennie Davis',
+      twitter: 'kenniejaydavis',
+    },
   ];
 
   function chunkList<ITEM>(itemList: ITEM[], chunkSize: number): Array<ITEM[]> {

@@ -172,11 +172,14 @@ function normalizeBuildTargetOptions(
   buildOptions.index =
     typeof buildOptions.index === 'string'
       ? joinPathFragments(offset, buildOptions.index)
-      : (buildOptions.index.input = joinPathFragments(
-          offset,
-          buildOptions.index.input
-        ));
-  buildOptions.tsConfig = joinPathFragments(offset, buildOptions.tsConfig);
+      : {
+          ...buildOptions.index,
+          input: joinPathFragments(offset, buildOptions.index.input),
+        };
+  // cypress creates a tsconfig if one isn't preset
+  // that contains all the support required for angular and component tests
+  delete buildOptions.tsConfig;
+
   buildOptions.fileReplacements = buildOptions.fileReplacements.map((fr) => {
     fr.replace = joinPathFragments(offset, fr.replace);
     fr.with = joinPathFragments(offset, fr.with);
@@ -196,17 +199,17 @@ function normalizeBuildTargetOptions(
     buildOptions.assets = buildOptions.assets.map((asset) => {
       return typeof asset === 'string'
         ? joinPathFragments(offset, asset)
-        : (asset.input = joinPathFragments(offset, asset.input));
+        : { ...asset, input: joinPathFragments(offset, asset.input) };
     });
     buildOptions.styles = buildOptions.styles.map((style) => {
       return typeof style === 'string'
         ? joinPathFragments(offset, style)
-        : (style.input = joinPathFragments(offset, style.input));
+        : { ...style, input: joinPathFragments(offset, style.input) };
     });
     buildOptions.scripts = buildOptions.scripts.map((script) => {
       return typeof script === 'string'
         ? joinPathFragments(offset, script)
-        : (script.input = joinPathFragments(offset, script.input));
+        : { ...script, input: joinPathFragments(offset, script.input) };
     });
   } else {
     const stylePath = getTempStylesForTailwind(ctContext);

@@ -1,7 +1,8 @@
 {
   "name": "@nrwl/next",
   "version": "0.0.1",
-  "description": "When using Next.js in Nx, you get the out-of-the-box support for TypeScript, Cypress, and Jest. No need to configure anything: watch mode, source maps, and typings just work.\n\nThe Next.js plugin contains executors and generators for managing Next.js applications and libraries within an Nx workspace. It provides:\n\n\n- Scaffolding for creating, building, serving, linting, and testing Next.js applications.\n\n- Integration with building, serving, and exporting a Next.js application.\n\n- Integration with React libraries within the workspace.",
+  "private": false,
+  "description": "The Next.js plugin for Nx contains executors and generators for managing Next.js applications and libraries within an Nx workspace. It provides:\n\n\n- Scaffolding for creating, building, serving, linting, and testing Next.js applications.\n\n- Integration with building, serving, and exporting a Next.js application.\n\n- Integration with React libraries within the workspace. \n\nWhen using Next.js in Nx, you get the out-of-the-box support for TypeScript, Cypress, and Jest. No need to configure anything: watch mode, source maps, and typings just work.",
   "repository": {
     "type": "git",
     "url": "https://github.com/nrwl/nx.git",
@@ -39,12 +40,11 @@
     "@nrwl/jest": "file:../jest",
     "@nrwl/linter": "file:../linter",
     "@nrwl/react": "file:../react",
-    "@nrwl/web": "file:../web",
+    "@nrwl/webpack": "file:../webpack",
     "@nrwl/workspace": "file:../workspace",
     "@svgr/webpack": "^6.1.2",
     "chalk": "4.1.0",
     "dotenv": "~10.0.0",
-    "eslint-config-next": "^12.1.0",
     "fs-extra": "^10.1.0",
     "ignore": "^5.0.4",
     "semver": "7.3.4",
@@ -52,5 +52,8 @@
     "tsconfig-paths": "^3.9.0",
     "url-loader": "^4.1.1",
     "webpack-merge": "^5.8.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

@@ -131,7 +131,10 @@ describe('MF Remote App Generator', () => {
       tree.read(`apps/test/src/app/remote-entry/entry.component.ts`, 'utf-8')
     ).toMatchSnapshot();
     expect(
-      tree.read(`apps/test/src/app/remote-entry/routes.ts`, 'utf-8')
+      tree.read(`apps/test/src/app/app.routes.ts`, 'utf-8')
+    ).toMatchSnapshot();
+    expect(
+      tree.read(`apps/test/src/app/remote-entry/entry.routes.ts`, 'utf-8')
     ).toMatchSnapshot();
   });
 
@@ -148,5 +151,48 @@ describe('MF Remote App Generator', () => {
     // ASSERT
     const projects = getProjects(tree);
     expect(projects.has('remote1-e2e')).toBeFalsy();
+  });
+
+  it('should generate a correct app component when inline template is used', async () => {
+    // ARRANGE
+    const tree = createTreeWithEmptyWorkspace();
+
+    // ACT
+    await remote(tree, {
+      name: 'test',
+      inlineTemplate: true,
+    });
+
+    // ASSERT
+    expect(tree.read('apps/test/src/app/app.component.ts', 'utf-8'))
+      .toMatchInlineSnapshot(`
+      "import { Component } from '@angular/core';
+
+      @Component({
+        selector: 'proj-root',
+        template: '<router-outlet></router-outlet>'
+
+      })
+      export class AppComponent {}"
+    `);
+  });
+
+  it('should update the index.html to use the remote entry component selector for root when standalone', async () => {
+    // ARRANGE
+    const tree = createTreeWithEmptyWorkspace();
+
+    // ACT
+    await remote(tree, {
+      name: 'test',
+      standalone: true,
+    });
+
+    // ASSERT
+    expect(tree.read('apps/test/src/index.html', 'utf-8')).not.toContain(
+      'proj-root'
+    );
+    expect(tree.read('apps/test/src/index.html', 'utf-8')).toContain(
+      'proj-test-entry'
+    );
   });
 });

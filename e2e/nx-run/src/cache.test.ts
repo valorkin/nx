@@ -14,7 +14,7 @@ import {
 describe('cache', () => {
   beforeEach(() => newProject());
 
-  afterAll(() => cleanupProject());
+  afterEach(() => cleanupProject());
 
   it('should cache command execution', async () => {
     const myapp1 = uniq('myapp1');
@@ -76,17 +76,13 @@ describe('cache', () => {
 
     // build individual project with caching
     const individualBuildWithCache = runCLI(`build ${myapp1}`);
-    expect(individualBuildWithCache).toContain(
-      'existing outputs match the cache'
-    );
+    expect(individualBuildWithCache).toContain('local cache');
 
     // skip caching when building individual projects
     const individualBuildWithSkippedCache = runCLI(
       `build ${myapp1} --skip-nx-cache`
     );
-    expect(individualBuildWithSkippedCache).not.toContain(
-      'existing outputs match the cache'
-    );
+    expect(individualBuildWithSkippedCache).not.toContain('local cache');
 
     // run lint with caching
     // --------------------------------------------
@@ -111,7 +107,7 @@ describe('cache', () => {
     // updateFile('workspace.json', (c) => {
     //   const workspaceJson = JSON.parse(c);
     //   workspaceJson.projects[myapp1].targets.lint = {
-    //     executor: '@nrwl/workspace:run-commands',
+    //     executor: 'nx:run-commands',
     //     options: {
     //       command: 'echo hi && exit 1',
     //     },
@@ -194,9 +190,7 @@ describe('cache', () => {
 
     // Rerun without touching anything
     const rerunWithUntouchedOutputs = runCLI(`build ${mylib}`);
-    expect(rerunWithUntouchedOutputs).toContain(
-      'existing outputs match the cache'
-    );
+    expect(rerunWithUntouchedOutputs).toContain('local cache');
     const outputsWithUntouchedOutputs = listFiles('dist');
     expect(outputsWithUntouchedOutputs).toContain('a.txt');
     expect(outputsWithUntouchedOutputs).toContain('b.txt');
@@ -210,9 +204,7 @@ describe('cache', () => {
 
     // Rerun
     const rerunWithNewUnrelatedFile = runCLI(`build ${mylib}`);
-    expect(rerunWithNewUnrelatedFile).toContain(
-      'existing outputs match the cache'
-    );
+    expect(rerunWithNewUnrelatedFile).toContain('local cache');
     const outputsAfterAddingUntouchedFileAndRerunning = listFiles('dist');
     expect(outputsAfterAddingUntouchedFileAndRerunning).toContain('a.txt');
     expect(outputsAfterAddingUntouchedFileAndRerunning).toContain('b.txt');
@@ -320,7 +312,7 @@ describe('cache', () => {
     expectProjectMatchTaskCacheStatus(
       actualOutput,
       expectedMatchedOutputProjects,
-      'existing outputs match the cache'
+      'local cache'
     );
   }
 

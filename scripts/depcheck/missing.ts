@@ -86,6 +86,7 @@ const IGNORE_MATCHES = {
     'swc-loader',
     'tsconfig-paths-webpack-plugin',
   ],
+  rollup: ['@swc/core'],
   storybook: [
     '@angular-devkit/architect',
     '@angular-devkit/core',
@@ -112,6 +113,7 @@ const IGNORE_MATCHES = {
     'fibers',
     'node-sass',
   ],
+  webpack: ['@swc/core', 'style-loader', 'swc-loader'],
   workspace: [
     'tslint',
     '@angular-devkit/architect',

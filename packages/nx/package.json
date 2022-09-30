@@ -1,7 +1,8 @@
 {
   "name": "nx",
   "version": "0.0.1",
-  "description": "Smart, Fast and Extensible Build System",
+  "private": false,
+  "description": "The core Nx plugin contains the core functionality of Nx like the project graph, nx commands and task orchestration.",
   "repository": {
     "type": "git",
     "url": "https://github.com/nrwl/nx.git",
@@ -32,6 +33,9 @@
   "homepage": "https://nx.dev",
   "dependencies": {
     "@parcel/watcher": "2.0.4",
+    "@yarnpkg/lockfile": "^1.1.0",
+    "@yarnpkg/parsers": "^3.0.0-rc.18",
+    "@zkochan/js-yaml": "0.0.6",
     "chalk": "4.1.0",
     "chokidar": "^3.5.1",
     "cli-cursor": "3.1.0",
@@ -45,12 +49,13 @@
     "fs-extra": "^10.1.0",
     "glob": "7.1.4",
     "ignore": "^5.0.4",
-    "jsonc-parser": "3.0.0",
+    "jsonc-parser": "3.2.0",
     "minimatch": "3.0.5",
     "npm-run-path": "^4.0.1",
     "open": "^8.4.0",
     "semver": "7.3.4",
     "string-width": "^4.2.3",
+    "strong-log-transformer": "^2.1.0",
     "tar-stream": "~2.2.0",
     "tmp": "~0.2.1",
     "tsconfig-paths": "^3.9.0",
@@ -75,31 +80,39 @@
   "nx-migrations": {
     "migrations": "./migrations.json",
     "packageGroup": [
-      "@nrwl/workspace",
       "@nrwl/angular",
+      "@nrwl/cli",
       "@nrwl/cypress",
+      "@nrwl/detox",
       "@nrwl/devkit",
+      "@nrwl/esbuild",
       "@nrwl/eslint-plugin-nx",
+      "@nrwl/expo",
       "@nrwl/express",
       "@nrwl/jest",
+      "@nrwl/js",
       "@nrwl/linter",
       "@nrwl/nest",
       "@nrwl/next",
       "@nrwl/node",
       "@nrwl/nx-plugin",
       "@nrwl/react",
+      "@nrwl/react-native",
+      "@nrwl/rollup",
       "@nrwl/storybook",
-      "@nrwl/web",
-      "@nrwl/js",
-      "@nrwl/cli",
       "@nrwl/tao",
+      "@nrwl/web",
+      "@nrwl/webpack",
+      "@nrwl/workspace",
       {
         "package": "@nrwl/nx-cloud",
         "version": "latest"
-      },
-      "@nrwl/react-native",
-      "@nrwl/detox"
+      }
     ]
   },
-  "executors": "./executors.json"
+  "executors": "./executors.json",
+  "builders": "./executors.json",
+  "publishConfig": {
+    "access": "public"
+  }
 }

@@ -1,7 +1,8 @@
 {
   "name": "@nrwl/react-native",
   "version": "0.0.1",
-  "description": "React Native brings React's declarative UI framework to iOS and Android. With React Native, you use native UI controls and have full access to the native platform.\n\nThe Nx Plugin for React Native contains generators for managing React Native applications and libraries within an Nx workspace. It provides:\n\n\n- Integration with libraries such as Jest, Detox, and Storybook.\n\n- Scaffolding for creating buildable libraries that can be published to npm.\n\n- Utilities for automatic workspace refactoring.",
+  "private": false,
+  "description": "The Nx Plugin for React Native contains generators for managing React Native applications and libraries within an Nx workspace. It provides: \n\n-Integration with libraries such as Jest, Detox, and Storybook.\n-Scaffolding for creating buildable libraries that can be published to npm.\n-Utilities for automatic workspace refactoring.",
   "keywords": [
     "Monorepo",
     "React",
@@ -35,18 +36,21 @@
     "enhanced-resolve": "^5.8.3",
     "fs-extra": "^10.1.0",
     "ignore": "^5.0.4",
-    "metro-resolver": "^0.72.1",
+    "metro-resolver": "^0.72.2",
     "minimatch": "3.0.5",
     "node-fetch": "^2.6.7",
     "tsconfig-paths": "^3.9.0"
   },
   "peerDependencies": {
-    "react-native": "^0.69.4"
+    "react-native": "^0.70.1"
   },
   "builders": "./executors.json",
   "ng-update": {
     "requirements": {},
     "migrations": "./migrations.json"
   },
-  "schematics": "./generators.json"
+  "schematics": "./generators.json",
+  "publishConfig": {
+    "access": "public"
+  }
 }

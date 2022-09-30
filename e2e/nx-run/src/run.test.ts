@@ -164,7 +164,7 @@ describe('Nx Running Tests', () => {
   projectFilePatterns: ['inferred-project.nxproject'],
   registerProjectTargets: () => ({
     "echo": {
-      "executor": "@nrwl/workspace:run-commands",
+      "executor": "nx:run-commands",
       "options": {
         "command": "echo inferred-target"
       }
@@ -193,6 +193,12 @@ describe('Nx Running Tests', () => {
       });
 
       expect(buildWithDaemon).toContain('Successfully ran target build');
+
+      const buildAgain = runCLI(`build ${myapp}`, {
+        env: { ...process.env, NX_DAEMON: 'true' },
+      });
+
+      expect(buildAgain).toContain('[local cache]');
     }, 10000);
 
     it('should build the project when within the project root', () => {

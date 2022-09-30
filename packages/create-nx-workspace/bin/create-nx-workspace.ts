@@ -56,6 +56,7 @@ enum Preset {
   React = 'react',
   ReactWithExpress = 'react-express',
   ReactNative = 'react-native',
+  Expo = 'expo',
   NextJs = 'next',
   Nest = 'nest',
   Express = 'express',
@@ -140,6 +141,10 @@ const presetOptions: { name: Preset; message: string }[] = [
     name: Preset.ReactNative,
     message:
       'react-native      [a workspace with a single React Native application]',
+  },
+  {
+    name: Preset.Expo,
+    message: 'expo              [a workspace with a single Expo application]',
   },
   {
     name: Preset.ReactWithExpress,
@@ -625,7 +630,8 @@ async function determineStyle(
     preset === Preset.NPM ||
     preset === Preset.Nest ||
     preset === Preset.Express ||
-    preset === Preset.ReactNative
+    preset === Preset.ReactNative ||
+    preset === Preset.Expo
   ) {
     return Promise.resolve(null);
   }
@@ -969,15 +975,19 @@ function mapErrorToBodyLines(error: {
 
 function execAndWait(command: string, cwd: string) {
   return new Promise((res, rej) => {
-    exec(command, { cwd }, (error, stdout, stderr) => {
-      if (error) {
-        const logFile = path.join(cwd, 'error.log');
-        writeFileSync(logFile, `${stdout}\n${stderr}`);
-        rej({ code: error.code, logFile, logMessage: stderr });
-      } else {
-        res({ code: 0, stdout });
+    exec(
+      command,
+      { cwd, env: { ...process.env, NX_DAEMON: 'false' } },
+      (error, stdout, stderr) => {
+        if (error) {
+          const logFile = path.join(cwd, 'error.log');
+          writeFileSync(logFile, `${stdout}\n${stderr}`);
+          rej({ code: error.code, logFile, logMessage: stderr });
+        } else {
+          res({ code: 0, stdout });
+        }
       }
-    });
+    );
   });
 }
 
@@ -1009,10 +1019,7 @@ function pointToTutorialAndCourse(preset: Preset) {
       output.addVerticalSeparator();
       output.note({
         title,
-        bodyLines: [
-          `https://nx.dev/react-tutorial/01-create-application`,
-          ...pointToFreeCourseOnEgghead(),
-        ],
+        bodyLines: [`https://nx.dev/react-tutorial/01-create-application`],
       });
       break;
     case Preset.Angular:
@@ -1020,39 +1027,17 @@ function pointToTutorialAndCourse(preset: Preset) {
       output.addVerticalSeparator();
       output.note({
         title,
-        bodyLines: [
-          `https://nx.dev/angular-tutorial/01-create-application`,
-          ...pointToFreeCourseOnYoutube(),
-        ],
+        bodyLines: [`https://nx.dev/angular-tutorial/01-create-application`],
       });
       break;
     case Preset.Nest:
       output.addVerticalSeparator();
       output.note({
         title,
-        bodyLines: [
-          `https://nx.dev/node-tutorial/01-create-application`,
-          ...pointToFreeCourseOnYoutube(),
-        ],
+        bodyLines: [`https://nx.dev/node-tutorial/01-create-application`],
       });
       break;
   }
-}
-
-function pointToFreeCourseOnYoutube(): string[] {
-  return [
-    ``,
-    `Prefer watching videos? Check out this free Nx course on YouTube.`,
-    `https://www.youtube.com/watch?v=2mYLe9Kp9VM&list=PLakNactNC1dH38AfqmwabvOszDmKriGco`,
-  ];
-}
-
-function pointToFreeCourseOnEgghead(): string[] {
-  return [
-    ``,
-    `Prefer watching videos? Check out this free Nx course on Egghead.io.`,
-    `https://egghead.io/playlists/scale-react-development-with-nx-4038`,
-  ];
 }
 
 /**

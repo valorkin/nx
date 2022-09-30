@@ -3,6 +3,7 @@ import {
   getProjects,
   joinPathFragments,
   readProjectConfiguration,
+  readWorkspaceConfiguration,
   Tree,
 } from '@nrwl/devkit';
 import type { Schema } from './schema';
@@ -102,8 +103,11 @@ function removeDeadCode(tree: Tree, options: Schema) {
   );
   if (!options.standalone) {
     const component =
-      tree.read(pathToAppComponent, 'utf-8').split('templateUrl')[0] +
+      tree
+        .read(pathToAppComponent, 'utf-8')
+        .split(options.inlineTemplate ? 'template' : 'templateUrl')[0] +
       `template: '<router-outlet></router-outlet>'
+
 })
 export class AppComponent {}`;
 
@@ -132,5 +136,19 @@ export class AppModule {}`
     );
   } else {
     tree.delete(pathToAppComponent);
+
+    const prefix = options.prefix ?? readWorkspaceConfiguration(tree).npmScope;
+    const remoteEntrySelector = `${prefix}-${projectName}-entry`;
+
+    const pathToIndexHtml = project.targets.build.options.index;
+    const indexContents = tree.read(pathToIndexHtml, 'utf-8');
+
+    const rootSelectorRegex = new RegExp(`${prefix}-root`, 'ig');
+    const newIndexContents = indexContents.replace(
+      rootSelectorRegex,
+      remoteEntrySelector
+    );
+
+    tree.write(pathToIndexHtml, newIndexContents);
   }
 }

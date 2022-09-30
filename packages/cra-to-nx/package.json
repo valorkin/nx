@@ -1,6 +1,8 @@
 {
   "name": "cra-to-nx",
   "version": "0.0.1",
+  "private": false,
+  "description": "This package will turn your React app into an Nx workspace. To use this package, your React app must have been generated and kept the structure of Create-React-App, with files generated either in js/jsx or ts/tsx.",
   "repository": {
     "type": "git",
     "url": "https://github.com/nrwl/nx.git",
@@ -27,5 +29,8 @@
     "nx": "file:../nx",
     "tslib": "^2.3.0",
     "yargs-parser": "21.0.1"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

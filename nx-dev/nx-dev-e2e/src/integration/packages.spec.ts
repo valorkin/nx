@@ -6,7 +6,7 @@ import { assertTextOnPage } from './helpers';
  */
 describe('nx-dev: Packages Section', () => {
   (<{ title: string; path: string }[]>[
-    { title: '@nrwl/', path: '/packages/angular' },
+    { title: '@nrwl/angular', path: '/packages/angular' },
     {
       title: '@nrwl/angular:add-linting',
       path: '/packages/angular/generators/add-linting',
@@ -117,8 +117,8 @@ describe('nx-dev: Packages Section', () => {
       path: '/packages/angular/executors/webpack-browser',
     },
     {
-      title: '@nrwl/angular:webpack-server',
-      path: '/packages/angular/executors/webpack-server',
+      title: '@nrwl/angular:webpack-dev-server',
+      path: '/packages/angular/executors/webpack-dev-server',
     },
     {
       title: '@nrwl/angular:module-federation-dev-server',
@@ -153,7 +153,41 @@ describe('nx-dev: Packages Section', () => {
     { title: '@nrwl/detox:build', path: '/packages/detox/executors/build' },
     { title: '@nrwl/detox:test', path: '/packages/detox/executors/test' },
     { title: '@nrwl/devkit', path: '/packages/devkit' },
+    { title: '@nrwl/esbuild', path: '/packages/esbuild' },
+    {
+      title: '@nrwl/esbuild:esbuild',
+      path: '/packages/esbuild/executors/esbuild',
+    },
     { title: '@nrwl/eslint-plugin-nx', path: '/packages/eslint-plugin-nx' },
+    { title: '@nrwl/expo', path: '/packages/expo' },
+    {
+      title: '@nrwl/expo:init',
+      path: '/packages/expo/generators/init',
+    },
+    {
+      title: '@nrwl/expo:application',
+      path: '/packages/expo/generators/application',
+    },
+    {
+      title: '@nrwl/expo:library',
+      path: '/packages/expo/generators/library',
+    },
+    {
+      title: '@nrwl/expo:component',
+      path: '/packages/expo/generators/component',
+    },
+    {
+      title: '@nrwl/expo:start',
+      path: '/packages/expo/executors/start',
+    },
+    {
+      title: '@nrwl/expo:sync-deps',
+      path: '/packages/expo/executors/sync-deps',
+    },
+    {
+      title: '@nrwl/expo:ensure-symlink',
+      path: '/packages/expo/executors/ensure-symlink',
+    },
     { title: '@nrwl/express', path: '/packages/express' },
     { title: '@nrwl/express:init', path: '/packages/express/generators/init' },
     {

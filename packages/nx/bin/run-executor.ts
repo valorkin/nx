@@ -1,6 +1,5 @@
 import { appendFileSync, openSync, writeFileSync } from 'fs';
 import { run } from '../src/command-line/run';
-import { addCommandPrefixIfNeeded } from '../src/utils/add-command-prefix';
 
 if (process.env.NX_TERMINAL_OUTPUT_PATH) {
   setUpOutputWatching(
@@ -13,14 +12,12 @@ if (!process.env.NX_WORKSPACE_ROOT) {
   console.error('Invalid Nx command invocation');
   process.exit(1);
 }
-let projectName;
 requireCli();
 
 function requireCli() {
   process.env.NX_CLI_SET = 'true';
   try {
     const args = JSON.parse(process.argv[2]);
-    projectName = args.targetDescription.project;
     run(
       process.cwd(),
       process.env.NX_WORKSPACE_ROOT,
@@ -69,16 +66,7 @@ function setUpOutputWatching(captureStderr: boolean, streamOutput: boolean) {
     onlyStdout.push(chunk);
     appendFileSync(stdoutAndStderrLogFileHandle, chunk);
     if (streamOutput) {
-      const updatedChunk = addCommandPrefixIfNeeded(
-        projectName,
-        chunk,
-        encoding
-      );
-      stdoutWrite.apply(process.stdout, [
-        updatedChunk.content,
-        updatedChunk.encoding,
-        callback,
-      ]);
+      stdoutWrite.apply(process.stdout, [chunk, encoding, callback]);
     } else {
       callback();
     }
@@ -91,16 +79,7 @@ function setUpOutputWatching(captureStderr: boolean, streamOutput: boolean) {
   ) => {
     appendFileSync(stdoutAndStderrLogFileHandle, chunk);
     if (streamOutput) {
-      const updatedChunk = addCommandPrefixIfNeeded(
-        projectName,
-        chunk,
-        encoding
-      );
-      stderrWrite.apply(process.stderr, [
-        updatedChunk.content,
-        updatedChunk.encoding,
-        callback,
-      ]);
+      stderrWrite.apply(process.stderr, [chunk, encoding, callback]);
     } else {
       callback();
     }

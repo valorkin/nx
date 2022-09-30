@@ -1,6 +1,7 @@
 {
   "name": "@nrwl/cypress",
   "version": "0.0.1",
+  "private": false,
   "description": "The Nx Plugin for Cypress contains executors and generators allowing your workspace to use the powerful Cypress integration testing capabilities.",
   "repository": {
     "type": "git",
@@ -43,11 +44,8 @@
     "babel-loader": "^8.0.2",
     "chalk": "4.1.0",
     "dotenv": "~10.0.0",
-    "enhanced-resolve": "^5.8.3",
     "fork-ts-checker-webpack-plugin": "7.2.13",
-    "rxjs": "^6.5.4",
     "ts-loader": "^9.3.1",
-    "tsconfig-paths": "^3.9.0",
     "tsconfig-paths-webpack-plugin": "3.5.2",
     "tslib": "^2.3.0",
     "webpack": "^4 || ^5",
@@ -60,5 +58,8 @@
     "cypress": {
       "optional": true
     }
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

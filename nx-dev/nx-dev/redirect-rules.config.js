@@ -57,7 +57,9 @@ const schemaUrls = {
   '/angular/ng-packagr-lite': '/packages/angular/executors/ng-packagr-lite',
   '/angular/package': '/packages/angular/executors/package',
   '/angular/webpack-browser': '/packages/angular/executors/webpack-browser',
-  '/angular/webpack-server': '/packages/angular/executors/webpack-server',
+  '/angular/webpack-server': '/packages/angular/executors/webpack-dev-server',
+  '/packages/angular/executors/webpack-server':
+    '/packages/angular/executors/webpack-dev-server',
   '/react/application': '/packages/react/generators/application',
   '/react/component': '/packages/react/generators/component',
   '/react/component-cypress-spec':
@@ -81,6 +83,8 @@ const schemaUrls = {
     '/packages/storybook/generators/migrate-stories-to-6-2',
   '/storybook/executors-build': '/packages/storybook/executors/build',
   '/storybook/executors-storybook': '/packages/storybook/executors/storybook',
+  '/storybook/extra-topics-for-angular-projects':
+    '/storybook/overview-angular#more-documentation',
   '/linter/eslint': '/packages/linter/executors/eslint',
   '/linter/lint': '/packages/linter/executors/lint',
   '/linter/workspace-rule': '/packages/linter/generators/workspace-rule',
@@ -146,7 +150,7 @@ const schemaUrls = {
  * Guide specific rules (added 2022-01-04)
  */
 const guideUrls = {
-  '/core-concepts/configuration': '/configuration/projectjson',
+  '/core-concepts/configuration': '/reference/project-configuration',
   '/core-concepts/mental-model': '/using-nx/mental-model',
   '/core-concepts/updating-nx': '/using-nx/updating-nx',
   '/core-concepts/ci-overview': '/using-nx/ci-overview',
@@ -253,6 +257,7 @@ const diataxis = {
   '/examples/apollo-react': '/recipe/apollo-react',
   '/examples/caching': '/recipe/caching',
   '/examples/dte': '/recipe/dte',
+  '/recipe/workspace-generators': '/recipe/local-generators',
 };
 
 /**

@@ -4,7 +4,7 @@
   "projectType": "application",
   "targets": {
     "build-base": {
-      "executor": "@nrwl/web:webpack",
+      "executor": "@nrwl/webpack:webpack",
       "options": {
         "maxWorkers": 8,
         "outputPath": "build/apps/graph",
@@ -101,19 +101,23 @@
       "outputs": ["{options.outputPath}"]
     },
     "serve": {
-      "executor": "@nrwl/web:dev-server",
+      "executor": "@nrwl/webpack:dev-server",
       "configurations": {
         "dev": {
-          "buildTarget": "graph-client:build-base:dev"
+          "buildTarget": "graph-client:build-base:dev",
+          "port": 4201
         },
         "nx-console": {
-          "buildTarget": "graph-client:build-base:nx-console"
+          "buildTarget": "graph-client:build-base:nx-console",
+          "port": 4202
         },
         "release": {
-          "buildTarget": "graph-client:build-base:release"
+          "buildTarget": "graph-client:build-base:release",
+          "port": 4203
         },
         "watch": {
-          "buildTarget": "graph-client:build-base:watch"
+          "buildTarget": "graph-client:build-base:watch",
+          "port": 4204
         }
       },
       "defaultConfiguration": "dev"
@@ -131,6 +135,37 @@
       "options": {
         "jestConfig": "graph/client/jest.config.ts",
         "passWithNoTests": true
+      }
+    },
+    "storybook": {
+      "executor": "@nrwl/storybook:storybook",
+      "options": {
+        "uiFramework": "@storybook/react",
+        "port": 4400,
+        "config": {
+          "configFolder": "graph/client/.storybook"
+        }
+      },
+      "configurations": {
+        "ci": {
+          "quiet": true
+        }
+      }
+    },
+    "build-storybook": {
+      "executor": "@nrwl/storybook:build",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "uiFramework": "@storybook/react",
+        "outputPath": "dist/storybook/graph-client",
+        "config": {
+          "configFolder": "graph/client/.storybook"
+        }
+      },
+      "configurations": {
+        "ci": {
+          "quiet": true
+        }
       }
     }
   },

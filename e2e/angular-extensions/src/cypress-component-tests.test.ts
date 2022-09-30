@@ -1,10 +1,12 @@
 import {
   checkFilesDoNotExist,
+  cleanupProject,
   createFile,
   newProject,
   runCLI,
   uniq,
   updateFile,
+  updateProjectConfig,
 } from '../../utils';
 import { names } from '@nrwl/devkit';
 describe('Angular Cypress Component Tests', () => {
@@ -13,7 +15,7 @@ describe('Angular Cypress Component Tests', () => {
   const usedInAppLibName = uniq('cy-angular-lib');
   const buildableLibName = uniq('cy-angular-buildable-lib');
 
-  beforeAll(() => {
+  beforeAll(async () => {
     projectName = newProject({ name: uniq('cy-ng') });
     runCLI(`generate @nrwl/angular:app ${appName} --no-interactive`);
     runCLI(
@@ -130,31 +132,44 @@ import {CommonModule} from '@angular/common';
   }
   `
     );
+
+    // make sure assets from the workspace root work.
+    createFile('libs/assets/data.json', JSON.stringify({ data: 'data' }));
+    updateProjectConfig(appName, (config) => {
+      config.targets['build'].options.assets.push({
+        glob: '**/*',
+        input: 'libs/assets',
+        output: 'assets',
+      });
+      return config;
+    });
   });
+
+  afterAll(() => cleanupProject());
 
   it('should test app', () => {
     runCLI(
-      `generate @nrwl/angular:cypress-component-configuration --project=${appName} --generate-tests`
+      `generate @nrwl/angular:cypress-component-configuration --project=${appName} --generate-tests --no-interactive`
     );
     expect(runCLI(`component-test ${appName} --no-watch`)).toContain(
       'All specs passed!'
     );
-  }, 1000000);
+  }, 300_000);
 
   it('should successfully component test lib being used in app', () => {
     runCLI(
-      `generate @nrwl/angular:cypress-component-configuration --project=${usedInAppLibName} --generate-tests`
+      `generate @nrwl/angular:cypress-component-configuration --project=${usedInAppLibName} --generate-tests --no-interactive`
     );
     expect(runCLI(`component-test ${usedInAppLibName} --no-watch`)).toContain(
       'All specs passed!'
     );
-  }, 1000000);
+  }, 300_000);
 
   it('should test buildable lib not being used in app', () => {
     expect(() => {
       // should error since no edge in graph between lib and app
       runCLI(
-        `generate @nrwl/angular:cypress-component-configuration --project=${buildableLibName} --generate-tests`
+        `generate @nrwl/angular:cypress-component-configuration --project=${buildableLibName} --generate-tests --no-interactive`
       );
     }).toThrow();
     createFile(
@@ -220,7 +235,7 @@ describe(InputStandaloneComponent.name, () => {
     );
 
     runCLI(
-      `generate @nrwl/angular:cypress-component-configuration --project=${buildableLibName} --generate-tests --build-target=${appName}:build`
+      `generate @nrwl/angular:cypress-component-configuration --project=${buildableLibName} --generate-tests --build-target=${appName}:build --no-interactive`
     );
     expect(runCLI(`component-test ${buildableLibName} --no-watch`)).toContain(
       'All specs passed!'
@@ -249,5 +264,5 @@ describe(InputStandaloneComponent.name, () => {
       'All specs passed!'
     );
     checkFilesDoNotExist(`tmp/libs/${buildableLibName}/ct-styles.css`);
-  }, 1000000);
+  }, 300_000);
 });

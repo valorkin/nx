@@ -1,7 +1,8 @@
 {
   "name": "@nrwl/workspace",
   "version": "0.0.1",
-  "description": "Smart, Fast and Extensible Build System.",
+  "private": false,
+  "description": "The Workspace plugin contains executors and generators that are useful for any Nx workspace. It should be present in every Nx workspace and other plugins build on it.",
   "repository": {
     "type": "git",
     "url": "https://github.com/nrwl/nx.git",
@@ -33,25 +34,29 @@
     "migrations": "./migrations.json",
     "packageGroup": {
       "@nrwl/angular": "*",
+      "@nrwl/cli": "*",
       "@nrwl/cypress": "*",
+      "@nrwl/detox": "*",
       "@nrwl/devkit": "*",
+      "@nrwl/esbuild": "*",
       "@nrwl/eslint-plugin-nx": "*",
+      "@nrwl/expo": "*",
       "@nrwl/express": "*",
       "@nrwl/jest": "*",
+      "@nrwl/js": "*",
       "@nrwl/linter": "*",
       "@nrwl/nest": "*",
       "@nrwl/next": "*",
       "@nrwl/node": "*",
+      "@nrwl/nx-cloud": "latest",
       "@nrwl/nx-plugin": "*",
       "@nrwl/react": "*",
-      "@nrwl/storybook": "*",
-      "@nrwl/web": "*",
-      "@nrwl/js": "*",
-      "@nrwl/cli": "*",
-      "@nrwl/tao": "*",
-      "@nrwl/nx-cloud": "latest",
       "@nrwl/react-native": "*",
-      "@nrwl/detox": "*",
+      "@nrwl/rollup": "*",
+      "@nrwl/storybook": "*",
+      "@nrwl/tao": "*",
+      "@nrwl/web": "*",
+      "@nrwl/webpack": "*",
       "nx": "*"
     }
   },
@@ -86,5 +91,8 @@
     "tslib": "^2.3.0",
     "yargs": "^17.4.0",
     "yargs-parser": "21.0.1"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

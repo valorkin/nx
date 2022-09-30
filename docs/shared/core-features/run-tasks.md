@@ -97,17 +97,4 @@ Learn more about the affected command [here](/concepts/affected).
 
 For more control over the order tasks are executed, edit the [Task Pipeline Configuration](../concepts/task-pipeline-configuration).
 
-To speed up your task execution, learn how to [Cache Task Results](./cache-task-results) and [Distribute Task Execution](./distribute-task-execution)
-
-## Related Documentation
-
-### Concepts
-
-- [Task Pipeline Configuration](/concepts/task-pipeline-configuration)
-- [How Affected Works](/concepts/affected)
-
-### Reference
-
-- [run command](/nx/run)
-- [run-many command](/nx/run-many)
-- [affected command](/nx/affected)
+To speed up your task execution, learn how to [Cache Task Results](/core-features/cache-task-results) and [Distribute Task Execution](/core-features/distribute-task-execution)

@@ -1,4 +1,5 @@
 import {
+  checkFilesExist,
   cleanupProject,
   isNotWindows,
   newProject,
@@ -37,14 +38,14 @@ describe('Extra Nx Misc Tests', () => {
       const withPrefixes = runCLI(`echo ${myapp} --output-style=stream`).split(
         isNotWindows() ? '\n' : '\r\n'
       );
-      expect(withPrefixes).toContain(`[${myapp}] 1`);
-      expect(withPrefixes).toContain(`[${myapp}] 2`);
-      expect(withPrefixes).toContain(`[${myapp}] inner`);
+      expect(withPrefixes).toContain(`${myapp}: 1`);
+      expect(withPrefixes).toContain(`${myapp}: 2`);
+      expect(withPrefixes).toContain(`${myapp}: inner`);
 
       const noPrefixes = runCLI(
         `echo ${myapp} --output-style=stream-without-prefixes`
       );
-      expect(noPrefixes).not.toContain(`[${myapp}]`);
+      expect(noPrefixes).not.toContain(`${myapp}: `);
     });
   });
 
@@ -139,7 +140,7 @@ describe('Extra Nx Misc Tests', () => {
     it('should pass options', async () => {
       updateProjectConfig(mylib, (config) => {
         config.targets.echo = {
-          executor: '@nrwl/workspace:run-commands',
+          executor: 'nx:run-commands',
           options: {
             command: 'echo --var1={args.var1}',
             var1: 'a',
@@ -156,7 +157,7 @@ describe('Extra Nx Misc Tests', () => {
       const echoTarget = uniq('echo');
       updateProjectConfig(mylib, (config) => {
         config.targets[echoTarget] = {
-          executor: '@nrwl/workspace:run-commands',
+          executor: 'nx:run-commands',
           options: {
             commands: [
               'echo "Arguments:"',
@@ -188,10 +189,10 @@ describe('Extra Nx Misc Tests', () => {
       expect(resultArgs).toContain('camel: d');
     }, 120000);
 
-    it('ttt should fail when a process exits non-zero', () => {
+    it('ttt should fail when a process exits non-zero', async () => {
       updateProjectConfig(mylib, (config) => {
         config.targets.error = {
-          executor: '@nrwl/workspace:run-commands',
+          executor: 'nx:run-commands',
           options: {
             command: `exit 1`,
           },
@@ -209,7 +210,7 @@ describe('Extra Nx Misc Tests', () => {
       }
     });
 
-    it('run command should not break if output property is missing in options and arguments', () => {
+    it('run command should not break if output property is missing in options and arguments', async () => {
       updateProjectConfig(mylib, (config) => {
         config.targets.lint.outputs = ['{options.outputFile}'];
         return config;
@@ -221,5 +222,46 @@ describe('Extra Nx Misc Tests', () => {
         })
       ).not.toThrow();
     }, 1000000);
+
+    it('should handle caching output directories containing trailing slashes', async () => {
+      // this test relates to https://github.com/nrwl/nx/issues/10549
+      // 'cp -a /path/dir/ dest/' operates differently to 'cp -a /path/dir dest/'
+      // --> which means actual build works but subsequent populate from cache (using cp -a) does not
+      // --> the fix is to remove trailing slashes to ensure consistent & expected behaviour
+
+      const mylib = uniq('lib');
+
+      const folder = `dist/libs/${mylib}/some-folder`;
+
+      runCLI(`generate @nrwl/workspace:lib ${mylib}`);
+
+      runCLI(
+        `generate @nrwl/workspace:run-commands build --command=echo --outputs=${folder}/ --project=${mylib}`
+      );
+
+      const commands = [
+        process.platform === 'win32'
+          ? `mkdir ${folder}` // Windows
+          : `mkdir -p ${folder}`,
+        `echo dummy > ${folder}/dummy.txt`,
+      ];
+      updateProjectConfig(mylib, (config) => {
+        delete config.targets.build.options.command;
+        config.targets.build.options = {
+          ...config.targets.build.options,
+          parallel: false,
+          commands: commands,
+        };
+        return config;
+      });
+
+      // confirm that it builds correctly
+      runCLI(`build ${mylib}`);
+      checkFilesExist(`${folder}/dummy.txt`);
+
+      // confirm that it populates correctly from the cache
+      runCLI(`build ${mylib}`);
+      checkFilesExist(`${folder}/dummy.txt`);
+    }, 120000);
   });
 });
